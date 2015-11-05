@@ -1,0 +1,65 @@
+Ideas for a simple lambda calculus interprater:
+
+====Elements:
+  There are the parts that are written out.
+
+Function Definition: _._
+  The left-hand side is the function's header, the right-hand side is the
+function's body. The header is a parameter, while the body can be any element.
+
+Function Application: (_ _)
+  The left-hand side is the called function and the right-hand side is its
+argument. Both can be any element.
+
+Function Parameter: _
+  An atom unit consisting of a identifier. They can be equal to or not equal
+to other parameters.
+
+====Forms:
+  There are the forms that the govern, in addition to their own rules, how
+elements are put together.
+
+Closed Function:
+  A closed function is one that is "complete" and does not need any additional
+context to be interprated correctly. This means that every parameter within
+its body is matched. A parameter is matched if it is within the body of a
+function who's header is equal to the parameter.
+  Note that the parameters in a closed function do not have to be matched to
+its header, they can be matched to a header inside of it.
+
+Open Function:
+  A function is one that does note have meaning outside of its context. They
+are generally invalid for use except within a closed function.
+
+Expression:
+  Either a closed function, or a function application whose left and right
+hand sides are expressions.
+
+====Operations:
+  There are how the elements and forms are transformed as part of the
+calculation.
+
+Evaluation:
+  Evaluation is applied to expressions. If the expression is a function it
+evaluates to itself. If the expression is an application its left hand side is
+evaluated, its right hand side is exaluated and then the function on the left
+is appled with the function on the right as its argument.
+  The result is the result of the application.
+
+Application:
+  When as a function is appled it starts a substution on its body, replacing
+instances of its header parameter with the argument. The result is the body of
+the function after substution.
+
+Substution:
+  Substution replaces a parameter with a function. If substution is applied
+to a parameter it will replace the parameter with the function if it is equal
+to the parameter in the operation or end if the parameters are not equal. If
+substution occures on a application then it is appled to the left and right
+hand sides of the application. If it is appled to a function it will halt if
+its parameter is equal to the function's header, otherwise it will be appled
+to the function's body.
+
+====Other stuff to follow:
+  It should be noted that the above is just the minimum to get the interprater
+running. Many other things can be added.
