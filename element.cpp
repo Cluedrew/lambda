@@ -2,6 +2,7 @@
 
 // Implemention of the Element class.
 
+#include <ostream>
 #include "substution-op.hpp"
 
 // Constructors and Deconstructor ============================================
@@ -20,24 +21,46 @@ Element::Element (char const * str, int & pos) :
   construct(str, pos);
 }
 
+// Advance to the next non-(white)space character.
+void Advance (char const * str, int & pos)
+{ ++pos; while (' ' == str[pos]) ++pos; }
+
 // Helpper used by the above constructors.
 void Element::construct(char const * str, int & pos)
 {
   // Advance to a non-space character.
-  while (' ' == str[pos]) ++pos;
+  //while (' ' == str[pos]) ++pos;
 
   // Create an evaluation.
   if ('(' == str[pos])
   {
+    core = '(';
+    //Advance(str, pos);
+    pos++;
+    lhs = new Element(str, pos);
+    pos++;
+    rhs = new Element(str, pos);
+    pos++;
+    // skip the ')'
+    //Advance(str, pos);
   }
   // Create a function.
   else if ('.' == str[pos + 1])
   {
+    core = '.';
+    lhs = new Element(str[pos]);
+    //Advance(str, pos);
+    pos++; pos++;
+    rhs = new Element(str, pos);
   }
   // Create a parameter.
   else
   {
+    core = str[pos];
+    pos++;
+    //Advance(str, pos);
   }
+  // std::cerr << '(' << core << ',' << lhs << ',' << rhs << ')' << std::endl;
 }
 
 // Parameter constructor, short cut to the given parameter.
@@ -46,15 +69,15 @@ Element::Element (char letter) :
 {}
 
 // By field constructor, for internal use only.
-Element (char symbol, Element * left, Element * right) :
+Element::Element (char symbol, Element * left, Element * right) :
   core(symbol), lhs(left), rhs(right)
 {}
 
 // Copy constructor (Deep Copy)
 Element::Element (Element const & other) :
   core(other.core),
-  lhs(other.lhs ? new Element(other.lhs) : nullptr),
-  rhs(other.rhs ? new Element(other.rhs) : nullptr)
+  lhs(other.lhs ? new Element(*other.lhs) : nullptr),
+  rhs(other.rhs ? new Element(*other.rhs) : nullptr)
 {}
 
 // Deconstructor
@@ -83,7 +106,7 @@ bool Element::isClosed () const
   if ('.' == core)
     // If everything in the right is bound to the parameter on the left,
     // or some later function header, the function is closed.
-    return rhs->isClosedWith(std::string(1, lhs->core);
+    return rhs->isClosedWith(std::string(1, lhs->core));
   else if ('(' == core)
     // Evaluations should check the right and left hand sides.
     return lhs->isClosed() && rhs->isClosed();
@@ -98,16 +121,16 @@ bool Element::isClosedWith (std::string bound) const
   // Functions bind their parameter and check to see if everything in their
   // body is bound.
   if ('.' == core)
-    if (bound.member(lhs->core))
+    if (bound.find(lhs->core))
       return rhs->isClosedWith(bound);
     else
-      return rhs->isClosedWith(bound.append(lhs->core));
+      return rhs->isClosedWith(bound + lhs->core);
   // Evaluations are closed if there left and right sides are closed.
   else if ('(' == core)
     return lhs->isClosedWith(bound) && rhs->isClosedWith(bound);
   // A parameter is closed if it appears in the list of bound parameters.
   else
-    return bound.member(core);
+    return std::string::npos != bound.find(core);
 }
 
 // Check to see if the element is an expretion.
@@ -137,7 +160,7 @@ Element * Element::evaluate () const
     // return lhs->evaluate().apply(rhs->evaluate()); with memory protection.
     Element * tmpl = lhs->evaluate();
     Element * tmpr = rhs->evaluate();
-    Element * tmpf = tmpl.apply(tmpr);
+    Element * tmpf = tmpl->apply(tmpr);
     delete tmpl;
     delete tmpr;
     return tmpf;
@@ -160,16 +183,38 @@ Element * Element::substute (SubstutionOp & subOp) const
   // Function
   if ('.' == core)
     return (subOp.replaced == lhs->core) ? new Element(*this) :
-        new Element('.', new Element(lhs->core),
-                         new Element(rhs->substute(subOp)));
+        new Element('.', new Element(lhs->core), rhs->substute(subOp));
   // Evaluation
   else if ('(' == core)
-    return new Element('(',
-        new Element(lhs->substute(subOp)),
-        new Element(rhs->substute(subOp)));
+    return new Element('(', lhs->substute(subOp), rhs->substute(subOp));
   // Parameter
   else
     return (subOp.replaced == core) ?
         new Element(*subOp.replaces) :
         new Element(core);
+}
+
+// Output Functions ==========================================================
+// Print the element to the given stream.
+void Element::print (std::ostream & out)
+{
+  if ('.' == core)
+  {
+    lhs->print(out);
+    out.put('.');
+    rhs->print(out);
+  }
+  else if ('(' == core)
+  {
+    out.put('(');
+    lhs->print(out);
+    out.put(' ');
+    rhs->print(out);
+    out.put(')');
+  }
+  else
+  {
+    out.put(core);
+  }
+  out << std::flush;
 }
