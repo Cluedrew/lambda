@@ -27,7 +27,7 @@ CXXLIBS=-lsfml-graphics -lsfml-window -lsfml-system
 DEBUG=-ggdb -DDEBUG=true
 
 TMPDIR=.obj
-CODEDIR=.
+CODEDIR=code
 CPPFILES=${FILENAMES:%=${CODEDIR}/%.cpp}
 OBJFILES=${FILENAMES:%=${TMPDIR}/%.o}
 DEPFILES=${OBJFILES:%.o=%.d}
