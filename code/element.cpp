@@ -5,6 +5,41 @@
 #include <ostream>
 #include "substution-op.hpp"
 
+#include "token.hpp"
+// New Constructor ===========================================================
+// Token Constructor
+Element::Element (std::vector<Token> const & tok, int & pos) :
+  core('\0'), lhs(nullptr), rhs(nullptr)
+{
+  // Create an evaluation.
+  if (Token::OpenApp == tok[pos].type)
+  {
+    core = '(';
+    //Advance(str, pos);
+    pos++;
+    lhs = new Element(tok, pos);
+    rhs = new Element(tok, pos);
+    // skip the ')'
+    pos++;
+    //Advance(str, pos);
+  }
+  // Create a function.
+  else if (Token::Dot == tok[pos + 1].type)
+  {
+    core = '.';
+    lhs = new Element(tok[pos].text);
+    //Advance(str, pos);
+    pos++; pos++;
+    rhs = new Element(tok, pos);
+  }
+  // Create a parameter.
+  else
+  {
+    core = tok[pos].text;
+    pos++;
+  }
+}
+
 // Constructors and Deconstructor ============================================
 // Create an element from a string.
 Element::Element (char const * str) :

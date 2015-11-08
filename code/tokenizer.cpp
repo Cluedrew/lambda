@@ -1,25 +1,27 @@
 #include "tokenizer.hpp"
 
 // Mass tokenization, transform the entire vector into tokens.
-static std::vector<Token> operator() (std::vector<char> chs)
+std::vector<Token> Tokenizer::mass (std::vector<char> const & chs)
 {
+  std::vector<Token> tokens;
   unsigned int n = chs.size();
   for (unsigned int i = 0 ; i < n ; ++i)
   {
-    switch (chs[n])
+    switch (chs[i])
     {
     case '.':
-      chs.push_back(Token{Token::Dot, '.'});
+      tokens.push_back(Token{Token::Dot, '.'});
       break;
     case '(':
-      chs.push_back(Token{Token::OpenEval, '('});
+      tokens.push_back(Token{Token::OpenApp, '('});
       break;
     case ')':
-      chs.push_back(Token{Token::CloseEval, ')'});
+      tokens.push_back(Token{Token::CloseApp, ')'});
       break;
     default:
-      if ('a' <= chs[n] && chs[n] <= 'z')
-        chs.push_back(Token{Token::Parameter, chs[n]});
+      if ('a' <= chs[i] && chs[i] <= 'z')
+        tokens.push_back(Token{Token::Variable, chs[i]});
     }
   }
+  return tokens;
 }

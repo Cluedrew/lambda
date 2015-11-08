@@ -7,16 +7,18 @@ struct Token
 {
   enum TokenType
   {
-    Parameter,
+    Variable,
     Dot,
-    OpenEval,
-    CloseEval,
+    OpenApp,
+    CloseApp,
 
     Cap
-  }
-  type;
+  };
 
-  //std::string text; For now all tokens are single characters.
+  // The type of the token.
+  TokenType type;
+
+  // For now all tokens are repersented by single characters.
   char text;
 };
 

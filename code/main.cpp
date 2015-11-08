@@ -1,14 +1,24 @@
 // Main file for the lambda calculator.
 
 #include <iostream>
+#include <vector>
 #include "element.hpp"
+#include "token.hpp"
+#include "tokenizer.hpp"
 
 // Interprate the provided string, print it and print the result of an
 // evaluation if possible, return the success of evaluation.
 // Read, evaluate, print.
 bool rep (char const * str)
 {
-  Element input(str);
+  std::vector<char> chars;
+  int i = 0;
+  while ('\0' != str[i]) {
+    chars.push_back(str[i]);
+  }
+  std::vector<Token> tokens(Tokenizer::mass(chars));
+  i = 0;
+  Element input(tokens, i);
   std::cout << "\"" << str << "\"" << std::endl;
   if (input.isExpretion())
   {
@@ -27,8 +37,9 @@ bool rep (char const * str)
 
 int main (int argc, char * argv[])
 {
-  bool fin = true;// = rep("x.x");
-  fin = fin && rep("(y.y z.z)");
+  bool fin = true;
+  for (int i = 1 ; i < argc ; ++i)
+    fin = fin && rep(argv[i]);
   return (fin) ? 0 : 1;
   /*
   Element val("x.x");

@@ -4,9 +4,11 @@
 /* Reperesents an element in my lambda caluclator.
  */
 
+#include <vector>
 #include <string>
 #include <iosfwd>
 struct SubstutionOp;
+struct Token;
 
 class Element
 {
@@ -28,6 +30,11 @@ public:
    */
 
 public:
+  Element (std::vector<Token> const &, int &);
+  /* Token Constructor, works like the string constructors and is temperary
+   * as I begin the language converion.
+   */
+
   Element (char const *);
   /* Create an element from a string.
    * Params: A pointer to an array of characters.

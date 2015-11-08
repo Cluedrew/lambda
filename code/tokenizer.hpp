@@ -14,8 +14,10 @@ private:
 protected:
 public:
 
-  static std::vector<Token> operator() (std::vector<char>);
+  static std::vector<Token> mass (std::vector<char> const &);
   /* Mass tokenization, transform the entire vector into tokens.
+   * Params: A vector of input characters.
+   * Return: A vector of tokens.
    */
 
   //static std::vector<Token> operator() (std::string);

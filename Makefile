@@ -12,7 +12,7 @@
 EXE=lambda
 
 # The base name of every code file used to create the binary.
-FILENAMES=main element
+FILENAMES=main element tokenizer
 
 # Leave empty to compile for release, otherwise system compiles for debugging.
 USE_DEBUG=

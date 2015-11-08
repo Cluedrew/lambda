@@ -1,39 +1,45 @@
-Ideas for a simple lambda calculus interprater:
+The definition of lambda calculus used in this project, syntax and simantics.
+This may vary from the formal definition of lambda caluclus as the project
+demands it.
 
 ====Elements:
-  There are the parts that are written out.
+  There are the parts that are written out:
 
-Function Definition: _._
+Function: _._
   The left-hand side is the function's header, the right-hand side is the
-function's body. The header is a parameter, while the body can be any element.
+function's body. The header is a variable, while the body can be any element.
 
-Function Application: (_ _)
+Application: (_ _)
   The left-hand side is the called function and the right-hand side is its
 argument. Both can be any element.
 
-Function Parameter: _
+Variable: _
   An atom unit consisting of a identifier. They can be equal to or not equal
-to other parameters.
+to other variables.
 
 ====Forms:
   There are the forms that the govern, in addition to their own rules, how
 elements are put together.
 
-Closed Function:
-  A closed function is one that is "complete" and does not need any additional
-context to be interprated correctly. This means that every parameter within
-its body is matched. A parameter is matched if it is within the body of a
-function who's header is equal to the parameter.
-  Note that the parameters in a closed function do not have to be matched to
-its header, they can be matched to a header inside of it.
+Bound and Free Variables:
+  A bound variable is any variable that occurs within the body of a function
+that has an equal variable in its header. It can occur at any level of nesting
+within the body.
+  A free variable is any variable that is not bound. They are currantly not
+allowed as they carry no meaning.
 
-Open Function:
-  A function is one that does note have meaning outside of its context. They
-are generally invalid for use except within a closed function.
+Closed and Open Functions:
+  A closed function is one that all variables within it are bound. They do not
+have to be bound to this function's header, instead they can be bound to
+functions within the function's body.
+  An open function is any function that is not closed. Currantly they can only
+occur as part of the body of a closed function.
 
 Expression:
   Either a closed function, or a function application whose left and right
 hand sides are expressions.
+  Currently the system only works with expressions that meet this definition
+as it eliminates some harder to deal with sub-cases.
 
 ====Operations:
   There are how the elements and forms are transformed as part of the
@@ -51,14 +57,18 @@ Application:
 instances of its header parameter with the argument. The result is the body of
 the function after substution.
 
-Substution:
-  Substution replaces a parameter with a function. If substution is applied
-to a parameter it will replace the parameter with the function if it is equal
-to the parameter in the operation or end if the parameters are not equal. If
-substution occures on a application then it is appled to the left and right
-hand sides of the application. If it is appled to a function it will halt if
-its parameter is equal to the function's header, otherwise it will be appled
-to the function's body.
+Substution: [ _ / _ ]
+  Substution replaces a variable with an element. When writing out the left
+hand side, the element or the substution value, replaces the right hand side,
+the variable or the substution target. Substution can be used on any element.
+  If substution is used on a function the result is the original function if
+the substution target is equal to the function's header variable. Otherwise,
+the substution is applied to the function body.
+  If substution is used on a variable the result is the original variable if
+it is not equal to the substution target, if they are equal the result is the
+substution value.
+  If substution is used on an application it is used on the left and right
+hand sides of the application.
 
 ====Other stuff to follow:
   It should be noted that the above is just the minimum to get the interprater
