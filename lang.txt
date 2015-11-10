@@ -1,0 +1,25 @@
+Lambda as a language:
+
+Terminal Symbols : tokens
+Dot .
+Variable [:lower:]
+OpenApp (
+CloseApp )
+eof
+
+Non-terminal Symbols
+INPUT
+ELEMENT
+FUNCTION
+APPLICATION
+
+Production rules
+INPUT ELEMENT eof
+ELEMENT FUNCTION
+ELEMENT APPLICATION
+ELEMENT Variable
+FUNCTION Variable Dot ELEMENT
+APPLICATION OpenApp ELEMENT ELEMENT CloseApp
+
+Starting symbol
+INPUT

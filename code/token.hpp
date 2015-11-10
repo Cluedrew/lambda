@@ -7,12 +7,12 @@ struct Token
 {
   enum TokenType
   {
-    Variable,
-    Dot,
-    OpenApp,
-    CloseApp,
+    variable,
+    dot,
+    openApp,
+    closeApp,
 
-    Cap
+    eof
   };
 
   // The type of the token.
