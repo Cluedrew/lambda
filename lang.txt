@@ -1,10 +1,10 @@
 Lambda as a language:
 
 Terminal Symbols : tokens
-Dot .
-Variable [:lower:]
-OpenApp (
-CloseApp )
+dot .
+variable [:lower:]
+openApp (
+closeApp )
 eof
 
 Non-terminal Symbols
@@ -17,9 +17,9 @@ Production rules
 INPUT ELEMENT eof
 ELEMENT FUNCTION
 ELEMENT APPLICATION
-ELEMENT Variable
-FUNCTION Variable Dot ELEMENT
-APPLICATION OpenApp ELEMENT ELEMENT CloseApp
+ELEMENT variable
+FUNCTION variable dot ELEMENT
+APPLICATION openApp ELEMENT ELEMENT closeApp
 
-Starting symbol
+Starting Symbol:
 INPUT

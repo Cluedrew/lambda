@@ -1,6 +1,10 @@
 #ifndef PARSE_NODE_HPP
 #define PARSE_NODE_HPP
 
+#include "parse-fwd.hpp"
+class Token;
+class Rule;
+
 // A node in the parse tree, an anonotated symbol.
 class ParseNode
 {
@@ -11,12 +15,12 @@ private:
 
 protected:
 public:
-  ParseNode (Token);
+  ParseNode (Token const &);
   /* Construct a terminal ParseNode from a Token.
    */
 
   ParseNode (SymbolT, std::vector<ParseNode /* * */> &);
-  ParseNode (SymbolT, std::vector<ParseNode /* * */> &, Rule);
+  ParseNode (SymbolT, std::vector<ParseNode /* * */> &, Rule const &);
   /* Construct a nonterminal ParseNode from a SymbolT and vector of child
    *   nodes. Optional Rule may be provided as a check.
    */
@@ -32,9 +36,9 @@ public:
    * zero or more children.
    */
 
-  ParseNode & child (unsigned int);
-  ParseNode const & child (unsigned int) const;
-  /* Get a reference to the nth child of this node.
+  ParseNode & child (unsigned int i);
+  ParseNode const & child (unsigned int i) const;
+  /* Get a reference to the ith child of this node.
    * Params:
    * Return:
    * Except:

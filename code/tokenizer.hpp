@@ -3,13 +3,14 @@
 
 /* A tokenizer class, scans through characters and produces tokens.
  *
- * A TokenSteam does the same, except does it as needed and so also keeps
- * track of its currant location.
+ * A TokenStream does the same, except does it as needed and so will track its
+ * progress. A TokenStream is non-copyable.
  */
 
 #include <vector>
 #include <string>
-#include "token.hpp"
+class Token;
+class TokenStreamCore;
 
 class Tokenizer
 {
@@ -30,9 +31,19 @@ public:
 class TokenStream
 {
 private:
+  // Pointer to Implementation
+  TokenStreamCore * heart;
+
+  // Non-copyable
+  TokenStream (TokenStream const &);
+  TokenStream & operator= (TokenStream const &);
 protected:
 public:
   TokenStream (Tokenizer const &, /*Some sort of character stream*/);
+
+  TokenStream (std::vector<Token>);
+  /* Create a TokenStream from a vector of tokens.
+   */
 
   virtual ~TokenStream ();
 

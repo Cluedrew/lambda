@@ -13,26 +13,20 @@ struct CFGrammer
   symbol_t start;
 };
 
-// The data type that repersents the stack in cfg parser.
-// (Move to the cpp file, is an implementation detal.)
-struct CFGStack
-{
-  state_t startState;
-  std::stack<std::pair<trans_t, state_t> stack;
-};
-
 class CFGParser
 {
 private:
 protected:
 public:
-  GFGParser (StateMachine);
-  GFGParser (std::vector<Rules>);
+  CFGParser (ActionTable);
+  CFGParser (StateMachine);
+  CFGParser (std::vector<Rules>);
+  // I am unsure of which constructors will make the cut.
 
   virtual ~GFGParser ();
 
   ParseNode * parse (std::vector<Token> const &);
-  ParseNode * parse (Tokenizer const &);
+  ParseNode * parse (TokenStream const &);
   /* Parse a series or stream of tokens, producing a parse tree.
    * Params:
    * Effect: void?

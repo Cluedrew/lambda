@@ -12,27 +12,24 @@ typedef ? payload_t;
 
 #include <set>
 #include <vector>
-#include <utlity>
 
 // Will this have to be a template?
+template<typename StateT_, typename TransT_, typename PayLoadT_>
 struct StateMachine
 {
   struct Edge
   {
-    state_t from;
-    trans_t by;
-    state_t to;
+    StateT from;
+    TransT by;
+    StateT to;
   };
 
-  // struct StateData { state_t state; payload_t data; };
-
-  std::set<state_t> states;
-  std::vector<std::pair<state_t, payload_t> > accepting;
-  //std::vector<StateData> stateData;
+  std::set<StateT_> states;
+  std::map<StateT_, PayloadT_> data;
   std::vector<Edge> transitions;
-  state_t start;
+  StateT start;
 
-  bool isState (state_t state) const
+  bool isState (StateT_ state) const
   { return states.count(state); }
 };
 
