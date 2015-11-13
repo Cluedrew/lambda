@@ -43,4 +43,8 @@ typedef unsigned int StateT;
 // Type definition for the parse tree type:
 class ParseNode;
 
+// Type definitions for the Production/Reduction Rule and Items there of:
+class Rule;
+class Item;
+
 #endif//PARSE_FWD

@@ -4,6 +4,7 @@
 
 #include <cstdlib>
 #include "token.hpp"
+#include "symbol.hpp"
 
 // ===========================================================================
 // Tokenizer =================================================================
@@ -18,17 +19,17 @@ std::vector<Token> Tokenizer::mass (std::vector<char> const & chs)
     switch (chs[i])
     {
     case '.':
-      tokens.push_back(Token{Token::dot, '.'});
+      tokens.push_back(Token{SymbolT::dot, '.'});
       break;
     case '(':
-      tokens.push_back(Token{Token::openApp, '('});
+      tokens.push_back(Token{SymbolT::openApp, '('});
       break;
     case ')':
-      tokens.push_back(Token{Token::closeApp, ')'});
+      tokens.push_back(Token{SymbolT::closeApp, ')'});
       break;
     default:
       if ('a' <= chs[i] && chs[i] <= 'z')
-        tokens.push_back(Token{Token::variable, chs[i]});
+        tokens.push_back(Token{SymbolT::variable, chs[i]});
     }
   }
   return tokens;
@@ -52,7 +53,7 @@ struct TokenStreamCore
 };
 
 // A copy of the eof token for easy access and retrival.
-Token const TokenStreamCore::eofToken = Token::newEOF();
+Token const TokenStreamCore::eofToken = Token{SymbolT::eof, '\0'};
 
 // Turns a vector into a stream.
 class TokStrVectorWrapper

@@ -35,24 +35,22 @@ ParseNode::ParseNode (SymbolT head, std::vector<ParseNode /* * */> & kids,
       }
 
   if (error)
-    throw std::bad_argument("ParseNode constructor check failed.");
+    throw std::invalid_argument("ParseNode constructor check failed.");
 }
 
 // Check to see if the node is a terminal or non-terminal node.
-bool ParseNode::isTerminal () const
-{}
+bool ParseNode::isThisTerminal () const
+{ return isTerminal(head); }
 
 // Check to see if the node is a terminal or non-terminal node.
-bool ParseNode::isNonTerminal () const
-{}
+bool ParseNode::isThisNonTerminal () const
+{ return isNonTerminal(head); }
 
 // Getter Functions ==========================================================
 
 // Get the number of children of this node.
 unsigned int ParseNode::size () const
-{
-  return children.size();
-}
+{ return children.size(); }
 
 // Get a reference to the ith child of this node.
 ParseNode & ParseNode::child (unsigned int i)

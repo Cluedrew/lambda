@@ -17,9 +17,6 @@ struct Token
 
   // For now all tokens are repersented by single characters.
   TextT text;
-
-  // The eof token is a special placeholder.
-  static Token newEOF () { return Token{eof, '\0'}; }
 };
 
 #endif//TOKEN_HPP

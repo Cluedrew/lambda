@@ -1,9 +1,8 @@
 #ifndef PARSE_NODE_HPP
 #define PARSE_NODE_HPP
 
+#include <vector>
 #include "parse-fwd.hpp"
-class Token;
-class Rule;
 
 // A node in the parse tree, an anonotated symbol.
 class ParseNode
@@ -27,14 +26,14 @@ public:
    * Params: A "head" SymbolT to reperent this node, a reference to a vector
    *   of child ParseNodes and optionally a constant reference to a Rule.
    * Effect: ? Empties the vector of nodes. ?
-   * Except: Throws std::bad_argument if the check does not match.
+   * Except: Throws std::invalid_argument if the check does not match.
    *
    * Check: If the Rule is provided than the SymbolT must match the Rule's lhs
    *   and the vector must be the same length
    */
 
-  bool isTerminal () const;
-  bool isNonTerminal () const;
+  bool isThisTerminal () const;
+  bool isThisNonTerminal () const;
   /* Check to see if the node is a terminal or non-terminal node.
    * Return: True if the node is of the given type, false otherwise.
    */
