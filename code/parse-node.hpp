@@ -32,8 +32,8 @@ public:
    *   and the vector must be the same length
    */
 
-  bool isThisTerminal () const;
-  bool isThisNonTerminal () const;
+  bool isTerminal () const;
+  bool isNonTerminal () const;
   /* Check to see if the node is a terminal or non-terminal node.
    * Return: True if the node is of the given type, false otherwise.
    */

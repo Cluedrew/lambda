@@ -3,6 +3,8 @@
 
 // The declaration of the symbol enumeration, used as SymbolT.
 
+#include <iosfwd>
+
 enum class SymbolEnum : unsigned char
 {
   // Terminal / Token Symbols
@@ -18,20 +20,22 @@ enum class SymbolEnum : unsigned char
 };
 
 // Is a terminal symbol.
-inline bool isTerminal (SymbolEnum sym)
-{ return sym <= SymbolEnum::eof; }
+inline bool isTerminal (SymbolEnum sym);
 
 // Is a token kind. Equivilant to isTerminal.
-inline bool isTokenKind (SymbolEnum sym)
-{ return sym <= SymbolEnum::eof; }
+inline bool isTokenKind (SymbolEnum sym);
 
 // Is a non-terminal symbol.
-inline bool isNonTerminal (SymbolEnum sym)
-{ return SymbolEnum::eof < sym && sym < SymbolEnum::cap; }
+inline bool isNonTerminal (SymbolEnum sym);
 
 // Is a symbol (either terminal or non-terminal).
 // The only not symbol in the type is the cap, provided for looping.
-inline bool isSymbol (SymbolEnum sym)
-{ return sym < SymbolEnum::cap; }
+inline bool isSymbol (SymbolEnum sym);
+
+// Standard print operator overload.
+std::ostream & operator<< (std::ostream & out, SymbolEnum sym);
+
+// Standard read operator overload.
+std::istream & operator>> (std::istream & in, SymbolEnum & sym);
 
 #endif//SYMBOL_HPP

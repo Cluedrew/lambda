@@ -12,7 +12,7 @@
 EXE=lambda
 
 # The base name of every code file used to create the binary.
-FILENAMES=main tokenizer parse-node
+FILENAMES=main tokenizer parse-node symbol rule-item
 #main element tokenizer
 
 # Leave empty to compile for release, otherwise system compiles for debugging.

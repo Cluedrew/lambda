@@ -39,12 +39,12 @@ ParseNode::ParseNode (SymbolT head, std::vector<ParseNode /* * */> & kids,
 }
 
 // Check to see if the node is a terminal or non-terminal node.
-bool ParseNode::isThisTerminal () const
-{ return isTerminal(head); }
+bool ParseNode::isTerminal () const
+{ return ::isTerminal(head); }
 
 // Check to see if the node is a terminal or non-terminal node.
-bool ParseNode::isThisNonTerminal () const
-{ return isNonTerminal(head); }
+bool ParseNode::isNonTerminal () const
+{ return ::isNonTerminal(head); }
 
 // Getter Functions ==========================================================
 
@@ -72,7 +72,7 @@ Rule ParseNode::getRule () const
   Rule fin;
   fin.lhs = head;
   for (unsigned int i = 0 ; i < children.size() ; ++i)
-    fin.rhs.emplace_back(children[i]);
+    fin.rhs.emplace_back(children[i].getHead());
   return fin;
 }
 

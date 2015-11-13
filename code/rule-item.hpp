@@ -1,9 +1,14 @@
 #ifndef RULE_ITEM_HPP
 #define RULE_ITEM_HPP
 
-#include <iosfwd>
+// The production Rule structure and the Item there of.
+// Not that the constrants on Item are not enforced.
 
-// The production rule and the items.
+#include <iosfwd>
+#include <vector>
+#include "parse-fwd.hpp"
+
+// The production Rule
 struct Rule
 {
   SymbolT lhs;
@@ -11,7 +16,8 @@ struct Rule
   unsigned int cr () const; // count right, rhs.size()
 };
 
-struct Item // ??? : public Rule
+// The Item
+struct Item
 {
   SymbolT lhs;
   std::vector<SymbolT> rhs;
@@ -19,17 +25,15 @@ struct Item // ??? : public Rule
   unsigned int cr () const; // count right, rhs.size()
 };
 
-/*
 std::ostream & operator<< (std::ostream &, Rule const &);
 std::ostream & operator<< (std::ostream &, Item const &);
-/ * Print the Rule or Item to the given stream.
+/* Print the Rule or Item to the given stream.
  * Params: A reference to the stream to be printed to and a constant
  *   refrence to the Rule or Item to be printed.
  * Effect: Characters sent to stream buffer.
  * Return: A reference to the stream printed to.
  * Format: Prints lhs " ->" followed by " " rhs[n] for n=0...cr().
  *   For Item is n= place " * " rhs[n] is printed instead.
- * On hold until I have a print operation for the symbol_t.
  */
 
 #endif//RULE_ITEM_HPP
