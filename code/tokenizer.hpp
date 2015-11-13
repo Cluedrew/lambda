@@ -39,10 +39,12 @@ private:
   TokenStream & operator= (TokenStream const &);
 protected:
 public:
-  TokenStream (Tokenizer const &, /*Some sort of character stream*/);
+  //TokenStream (Tokenizer const &, /*Some sort of character stream*/);
 
-  TokenStream (std::vector<Token>);
+  TokenStream (std::vector<Token> const &);
   /* Create a TokenStream from a vector of tokens.
+   * Params: A vector of Tokens containing all the tokens to be produced by
+   *   the stream in order.
    */
 
   virtual ~TokenStream ();

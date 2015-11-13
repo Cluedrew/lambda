@@ -1,25 +1,22 @@
 #ifndef TOKEN_HPP
 #define TOKEN_HPP
 
-// The Token class repersents a token from the tokenizer.
+/* The Token structure repersents a token from the tokenizer.
+ * There are actually two restrictions on this type not enforced.
+ * - kind should always be an isTokenKind value of SymbolT
+ * - text should always be text that would generate a token of kind.
+ * I decide enforcing it was not worth the trouble so... houner system.
+ */
+
+#include "parse-fwd.hpp"
 
 struct Token
 {
-  enum TokenType
-  {
-    variable,
-    dot,
-    openApp,
-    closeApp,
-
-    eof
-  };
-
   // The type of the token.
-  TokenType type;
+  SymbolT kind;
 
   // For now all tokens are repersented by single characters.
-  char text;
+  TextT text;
 
   // The eof token is a special placeholder.
   static Token newEOF () { return Token{eof, '\0'}; }

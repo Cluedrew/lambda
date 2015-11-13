@@ -63,13 +63,13 @@ private:
   std::vector<Token>::iterator end;
 protected:
 public:
-  TokStrVectorWrapper (std::vector<Token> & vec) :
-      tokens(vec), cur(tokens.begin()), end(tokens.end());
+  TokStrVectorWrapper (std::vector<Token> const & vec) :
+      tokens(vec), cur(tokens.begin()), end(tokens.end())
   {}
 
   virtual ~TokStrVectorWrapper () {}
 
-  Token next () { return (cur == end) ? eofToken : *(cur++); }
+  Token next (){ return (cur == end) ? TokenStreamCore::eofToken : *(cur++); }
 };
 
 // ===========================================================================
@@ -79,18 +79,23 @@ public:
 TokenStream::TokenStream (TokenStream const & other)
 { exit(EXIT_FAILURE); }
 TokenStream & TokenStream::operator= (TokenStream const & other)
-{ exit(EXIT_FAILURE); }
+{ exit(EXIT_FAILURE); return *this; }
 
 // Constrctors and Deconstructor =============================================
-TokenStream::TokenStream (Tokenizer const & tokenizer,
-                          /*Some sort of character stream*/) :
-  izer(tokenizer)
+//TokenStream::TokenStream (Tokenizer const & tokenizer,
+//                          /*Some sort of character stream*/) :
+//  heart(...)
+//{}
+
+// Create a TokenStream from a vector of tokens.
+TokenStream::TokenStream (std::vector<Token> const & vec) :
+  heart((TokenStreamCore*)new TokStrVectorWrapper(vec))
 {}
 
 // Deconstructor:
 TokenStream::~TokenStream ()
-{/* close the data stream */}
+{ delete heart; }
 
 // Get the next Token from the stream.
 Token TokenStream::next ()
-{}
+{ return heart->next(); }

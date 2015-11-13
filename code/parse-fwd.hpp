@@ -8,7 +8,8 @@
  * forward declaration file for the parsing part of the program.
  *
  * They are sort of like template arguments except global because they should
- * never have to have two seperate values in the same program.
+ * never have to have two seperate values in the same program. Appending a T
+ * means they are a typedef of something else.
  *
  * Most of these types are used only as labels and so only copying, equality
  * and ordering needs (occationally) to be defined for them.
@@ -20,23 +21,26 @@ typedef char TextT;
 
 // Type definition for the symbol type: reperesents the kind of token and
 //   the symbols used in the parse tree.
+enum class SymbolEnum : unsigned char;
 typedef SymbolEnum SymbolT;
-/*
-bool isTerminal (SymbolT); // Is a terminal symbol.
-bool isTokenKind (SymbolT); // Equivilant to isTerminal.
-bool isNonTerminal (SymbolT); // Is a non-terminal symbol.
-bool isSymbol (SymbolT); // Is a symbol (either terminal or non-terminal).
-*/
+
+// Forwarded functions.
+// Is a terminal symbol.
+bool isTerminal (SymbolT);
+// Is a token kind. Equivilant to isTerminal.
+bool isTokenKind (SymbolT);
+// Is a non-terminal symbol.
+bool isNonTerminal (SymbolT);
+// Is a symbol (either terminal or non-terminal).
+bool isSymbol (SymbolT);
 
 // The token type: full definition of the structure that reperents tokens.
-#include "token.hpp"
-// struct Token { SymbolT kind; TextT text; };
+class Token;
 
 // Type definition for the state type:
 typedef unsigned int StateT;
 
 // Type definition for the parse tree type:
-#include "parse-node.hpp"
-// class ParseNode; typedef ParseTreeT ParseNode;
+class ParseNode;
 
 #endif//PARSE_FWD

@@ -2,6 +2,7 @@
 
 // Implementation of the ParseNode class.
 
+#include <stdexcept>
 #include "token.hpp"
 #include "rule-item.hpp"
 
@@ -34,7 +35,7 @@ ParseNode::ParseNode (SymbolT head, std::vector<ParseNode /* * */> & kids,
       }
 
   if (error)
-  {}
+    throw std::bad_argument("ParseNode constructor check failed.");
 }
 
 // Check to see if the node is a terminal or non-terminal node.
@@ -55,11 +56,19 @@ unsigned int ParseNode::size () const
 
 // Get a reference to the ith child of this node.
 ParseNode & ParseNode::child (unsigned int i)
-{ return children[i]; }
+{
+  if (i >= children.size())
+    throw std::out_of_range("ParseNode::child out_of_range");
+  return children[i];
+}
 ParseNode const & ParseNode::child (unsigned int i) const
-{ return children[i]; }
+{
+  if (i >= children.size())
+    throw std::out_of_range("ParseNode::child out_of_range");
+  return children[i];
+}
 
-// Rule is recalcluated.
+// Get the Production Rule this node reperents.
 Rule ParseNode::getRule () const
 {
   Rule fin;
@@ -69,14 +78,14 @@ Rule ParseNode::getRule () const
   return fin;
 }
 
-// lhs
+// Get the "head" symbol, the token kind or the lhs of the Rule.
 SymbolT ParseNode::getHead () const
 { return head; }
 
-// rhs[n] Get head of ith child.
+// Get the head of the ith child, or the ith symbol of the Rule's rhs.
 SymbolT ParseNode::getISymbol (unsigned int i) const
 { return children[i].getHead(); }
 
-// Get the text.
+// Get the text from a non-terminal node.
 TextT ParseNode::getText () const
 { return text; }

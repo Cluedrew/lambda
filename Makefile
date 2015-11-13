@@ -12,7 +12,8 @@
 EXE=lambda
 
 # The base name of every code file used to create the binary.
-FILENAMES=main element tokenizer
+FILENAMES=main tokenizer
+#main element tokenizer
 
 # Leave empty to compile for release, otherwise system compiles for debugging.
 USE_DEBUG=
@@ -34,11 +35,13 @@ DEPFILES=${OBJFILES:%.o=%.d}
 
 CXXFLAGS+=${if ${USE_DEBUG},${DEBUG},}
 
-.PHONY : all clean test
+.PHONY : all clean deepclean test
 
 ### Recipes and Rules
 
-all : ${EXE}
+# Small temperary change, skipping the executable and just making the objfiles
+#all : ${EXE}
+all : ${OBJFILES}
 
 # Rule for the binary
 ${EXE} : ${OBJFILES}
