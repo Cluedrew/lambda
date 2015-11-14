@@ -14,6 +14,7 @@ struct Rule
   SymbolT lhs;
   std::vector<SymbolT> rhs;
   unsigned int cr () const; // count right, rhs.size()
+  bool operator< (Rule const &) const;
 };
 
 // The Item
@@ -23,6 +24,7 @@ struct Item
   std::vector<SymbolT> rhs;
   unsigned int place; // In the range of [0..cr()]
   unsigned int cr () const; // count right, rhs.size()
+  bool operator< (Item const &) const;
 };
 
 std::ostream & operator<< (std::ostream &, Rule const &);

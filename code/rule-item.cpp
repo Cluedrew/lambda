@@ -5,16 +5,41 @@
 #include <ostream>
 #include "symbol.hpp"
 
+
+
 // count right, rhs.size()
 unsigned int Rule::cr () const
 {
   return rhs.size();
 }
-
-// count right
 unsigned int Item::cr () const
 {
   return rhs.size();
+}
+
+// Less than comparison
+bool Rule::operator< (Rule const & other) const
+{
+  // Left hand side takes presidence
+  if (lhs < other.lhs) return true;
+  else if (lhs > other.lhs) return false;
+  // Right hand side come next
+  else if (rhs < other.rhs) return true;
+  // Equal to or greator than
+  else return false;
+}
+bool Item::operator< (Item const & other) const
+{
+  // Left hand side takes presidence
+  if (lhs < other.lhs) return true;
+  else if (lhs > other.lhs) return false;
+  // Right hand side come next
+  else if (rhs < other.rhs) return true;
+  else if (rhs > other.rhs) return false;
+  // Place acts as another tie breaker
+  else if (place < other.place) return true;
+  // Equal to or greator than
+  else return false;
 }
 
 // Print the Rule to the given stream.

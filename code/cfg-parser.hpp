@@ -1,17 +1,8 @@
 #ifndef CFG_PARSER_HPP
 #define CFG_PARSER_HPP
 
-/* Parses a context free grammer.
+/* Left Right 1 parser for a context free grammer.
  */
-
-// A structure that repersents a cfg. (Does it get its own file?)
-struct CFGrammer
-{
-  std::set<symbol_t> nonTerminals;
-  std::set<symbol_t> termianals;
-  std::vector<Rule> rules;
-  symbol_t start;
-};
 
 class CFGParser
 {
