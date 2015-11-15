@@ -2,17 +2,26 @@
 #define CFG_PARSER_HPP
 
 /* Left Right 1 parser for a context free grammer.
+ * It gets its set of Shift/Reduce operations from an ActionTable to process
+ * the Tokens from a TokenStream.
  */
+
+#include <vector>
+#include "action-table.hpp"
+class ParseNode;
+class Token;
 
 class CFGParser
 {
 private:
+  ActionTable actions;
+
 protected:
 public:
-  CFGParser (ActionTable);
-  CFGParser (StateMachine);
-  CFGParser (std::vector<Rules>);
-  // I am unsure of which constructors will make the cut.
+  CFGParser (ActionTable const &);
+  /* Create a parser from the ActionTable that speifies its actions.
+   * Params: A constant reference to an ActionTable, which is copied.
+   */
 
   virtual ~GFGParser ();
 
