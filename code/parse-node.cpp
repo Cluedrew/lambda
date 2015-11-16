@@ -6,6 +6,7 @@
 #include "token.hpp"
 #include "rule-item.hpp"
 
+// Constructors and Deconstructors ===========================================
 // Construct a terminal ParseNode from a Token.
 ParseNode::ParseNode (Token const & token) :
   head(token.kind), children(), text(token.text)
@@ -38,6 +39,7 @@ ParseNode::ParseNode (SymbolT head, std::vector<ParseNode /* * */> & kids,
     throw std::invalid_argument("ParseNode constructor check failed.");
 }
 
+// Predicate Functions =======================================================
 // Check to see if the node is a terminal or non-terminal node.
 bool ParseNode::isTerminal () const
 { return ::isTerminal(head); }
@@ -47,7 +49,6 @@ bool ParseNode::isNonTerminal () const
 { return ::isNonTerminal(head); }
 
 // Getter Functions ==========================================================
-
 // Get the number of children of this node.
 unsigned int ParseNode::size () const
 { return children.size(); }

@@ -7,6 +7,9 @@
  * differently, but it is designed to take advantage of the parse tree.
  */
 
+#include "parse-fwd.hpp"
+class ParseNode;
+
 struct Element
 {
   // Internal Definitions:
@@ -19,13 +22,13 @@ struct Element
 
   struct Variable
   {
-    char id;
+    TextT id;
   };
 
   struct Function
   {
     Variable head;
-    Element * Body;
+    Element * body;
   };
 
   struct Application
