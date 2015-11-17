@@ -84,9 +84,14 @@ private:
 
   CFGrammer const grammer;
 
-  std::map<SymbolT, bool> nullable;
-  std::map<SymbolT, std::set<SymbolT> > follow;
-  std::map<SymbolT, std::set<SymbolT> > first;
+  struct SymbolData
+  {
+    SymbolData(SymbolT);
+    bool nullable;
+    std::set<SymbolT> first;
+    std::set<SymbolT> follow;
+  };
+  std::map<SymbolT, SymbolData> symbols;
 protected:
 public:
   ActionTableGenerator (CFGrammer);
