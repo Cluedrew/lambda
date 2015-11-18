@@ -56,6 +56,9 @@ ActionTableGenerator::ActionTableGenerator (CFGrammer cfg) :
   for (SymbolT isym = SymbolEnum::variable ; isym < cap ; ++isym)
     symbols.insert(std::make_pair(isym, SymbolData(isym));
 
+  // Calculate the actual values for all symbols.
+  preformAllCalc();
+
   // Calculate nullable
   // A symbol is nullable if it:
   // - Is the left hand side of a Rule with an empty right hand side.
@@ -85,7 +88,7 @@ ActionTableGenerator::~ActionTableGenerator ()
 // Rule -> Boolean * rule to proccess -> did that change anything
 // Also they have to be run in order.
 
-bool CalcNullable (Rule rule)
+bool ActionTableGenerator::calcNullable (Rule rule)
 {
   // We never need to re-check nullable symbols.
   if (isNullable(rule.lhs))
@@ -108,7 +111,7 @@ bool CalcNullable (Rule rule)
     return false;
 }
 
-bool CalcFirst (Rule rule)
+bool ActionTableGenerator::calcFirst (Rule rule)
 {
   // The set we might modify and whether it has changed.
   std::set<SymbolT> & firstSet = symbols[rule.lhs].first;
@@ -132,7 +135,7 @@ bool CalcFirst (Rule rule)
   return hasChanged;
 }
 
-bool CalcFollow (Rule rule)
+bool ActionTableGenerator::calcFollow (Rule rule)
 {
   // Keep a look out for any changes.
   bool hasChanged = false;
@@ -140,19 +143,51 @@ bool CalcFollow (Rule rule)
   // The set of symbols to add, starts with the follow of the rhs.
   std::set<SymbolT> addSet = symbols[rule.lhs].follow;
 
-  // For each symbol on the rhs,
-  for (i / it)
-  {
-    // ... get its follow set, ...
-    std::set<SymbolT> & followSet = symbols[rule.rhs[*]].follow;
+  // Iterators: because their declarations are too long.
+  std::vector<SymbolT>::reverse_iterator it;
+  std::set<SymbolT>::iterator jt;
 
-    // ... union it with the addSet, ...
-    for ( j / jt)
-      hasChanged = followSet.insert( ).second || hasChanged;
+  // For each symbol on the rhs ...
+  for (it = rule.rhs.rbegin() ; it != rule.rhs.rend() ; ++it))
+  {
+    // ... get its follow set ...
+    std::set<SymbolT> & followSet = symbols[*it].follow;
+
+    // ... union it with the addSet ...
+    for (jt = addSet.begin() ; jt != addSet.end() ; ++jt)
+      hasChanged = followSet.insert(*jt).second || hasChanged;
 
     // ... clear the addSet if the symbol is non-nullable ...
+    if (!isNullable(*it))
+      addSet.clear();
+
     // ... and add the symbol's first set to the addSet.
+    for (jt = symbols[*it].first.begin() ;
+         jt != symbols[*it].first.end() ; ++jt)
+      addSet.insert(*jt);
   }
+
+  return hasChanged;
+}
+
+/* Call all of the calculation functions, in order and repeating each until
+ *   they are stable and no more updates have to be made.
+ */
+void ActionTableGenerator::preformAllCalc ()
+{
+#define REPEAT_OVER_RULES(calcFunc) \
+  do { \
+    bool change = false; \
+    for (std::set<Rule>::iterator it = grammer.rules.begin() ; \
+         it != grammer.rules.end() ; ++it) \
+      change =|| calcFunc(*it); \
+  } while (change);
+
+  REPEAT_OVER_RULES(calcNullable)
+  REPEAT_OVER_RULES(calcFirst)
+  REPEAT_OVER_RULES(calcFollow)
+
+#undef REPEAT_OVER_RULES
 }
 
 // Implementation Functions ==================================================
@@ -169,10 +204,27 @@ std::set<SymbolT> ActionTableGenerator::followSet (SymbolT sym) const
 { return symbols[sym].follow; }
 
 // Create and return a new ActionTable from this generator.
-ActionTable ActionTableGenerator::generate () const;
+ActionTable ActionTableGenerator::generate () const
+{
+  if (!canGenerate())
+  {
+    printProblems(std::cerr);
+    throw ?;
+  }
+}
 
 // Check to see if the instance can currantly generate an ActionTable.
-bool ActionTableGenerator::canGenerate () const;
+bool ActionTableGenerator::canGenerate () const
+{
+  // For every state in data:
+  for ()
+    // For every transition out of every state
+      for ()
+        // Is there 0 or 1 possible destinations
+        if (!)
+          // If not we can't generate an ActionTable.
+          return false;
+}
 
 // Print the problems that prevent a ActionTable from being generated.
-void ActionTableGenerator::printProblems (std::ostream &) const;
+void ActionTableGenerator::printProblems (std::ostream & out) const;

@@ -22,9 +22,9 @@ typedef int StateT;
 class ActionTable
 {
 private:
-protected:
   std::map<StateT, std::map<SymbolT,SROp> > data;
 
+protected:
 public:
   ActionTable ();
   // Create an unfilled ActionTable.
@@ -54,7 +54,7 @@ public:
   SROp getOp (StateT, SymbolT) const;
   /* Get the SROp for a given state
    * Params: The StateT and SymbolT lookup for an SROp.
-   * Return: A copy ??? of the SROp.
+   * Return: A copy of the SROp.
    * Except:
    */
 
@@ -92,6 +92,12 @@ private:
     std::set<SymbolT> follow;
   };
   std::map<SymbolT, SymbolData> symbols;
+
+  bool calcNullable (Rule);
+  bool calcFirst (Rule);
+  bool calcFollow (Rule);
+  void preformAllCalc ();
+
 protected:
 public:
   ActionTableGenerator (CFGrammer);
