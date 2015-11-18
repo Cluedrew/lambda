@@ -9,7 +9,7 @@ class ParseNode
 {
 private:
   SymbolT head;
-  std::vector<ParseNode /* * */> children;
+  std::vector<ParseNode*> children;
   TextT text;
 
 protected:
@@ -19,17 +19,19 @@ public:
    * Params: A constant reference to a Token.
    */
 
-  ParseNode (SymbolT, std::vector<ParseNode /* * */> &);
-  ParseNode (SymbolT, std::vector<ParseNode /* * */> &, Rule const &);
+  ParseNode (SymbolT, std::vector<ParseNode*> &);
+  ParseNode (SymbolT, std::vector<ParseNode*> &, Rule const &);
   /* Construct a nonterminal ParseNode from a SymbolT and vector of child
    *   nodes. Optional Rule may be provided as a check.
    * Params: A "head" SymbolT to reperent this node, a reference to a vector
-   *   of child ParseNodes and optionally a constant reference to a Rule.
-   * Effect: ? Empties the vector of nodes. ?
+   *   of child ParseNodes, the contents of which are moved into the ParseNode
+   *   and optionally a constant reference to a Rule.
+   * Effect: Empties the vector.
    * Except: Throws std::invalid_argument if the check does not match.
    *
    * Check: If the Rule is provided than the SymbolT must match the Rule's lhs
-   *   and the vector must be the same length
+   *   and the vector must be the same length as the Rule's rhs and have the
+   *   same symbols in the same order.
    */
 
   bool isTerminal () const;
@@ -44,9 +46,9 @@ public:
    * zero or more children.
    */
 
-  ParseNode & child (unsigned int i);
-  ParseNode const & child (unsigned int i) const;
-  /* Get a reference to the ith child of this node.
+  ParseNode * child (unsigned int i);
+  ParseNode const * child (unsigned int i) const;
+  /* Get a pointer to the ith child of this node.
    * Params: An unsigned integer i less than size().
    * Return: A reference, possibly constant, to the ith child of this node.
    * Except: Throws std::out_of_range if i is out of range.

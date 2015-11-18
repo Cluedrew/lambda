@@ -123,7 +123,7 @@ bool CalcFirst (Rule rule)
     for (std::set<SymbolT>::const_iterator it = innerSet.cbegin()) ;
          it != innerSet.cend() ; ++it)
       // ... try adding it to the this first set and check the result.
-      firstSet.insert(*it).second || hasChanged;
+      hasChanged = firstSet.insert(*it).second || hasChanged;
 
     // Break on non-null rhs symbol
     if (!isNullable(rule.rhs[i])) break;
@@ -134,22 +134,24 @@ bool CalcFirst (Rule rule)
 
 bool CalcFollow (Rule rule)
 {
-
   // Keep a look out for any changes.
   bool hasChanged = false;
 
-  // Maybe going backwards would be faster
-  // actually I think I can cut a factor of cr() out of the execution time.
-  // For each symbol on the rhs.
+  // The set of symbols to add, starts with the follow of the rhs.
+  std::set<SymbolT> addSet = symbols[rule.lhs].follow;
+
+  // For each symbol on the rhs,
   for (i / it)
   {
-    // The set we might modify.
-    std::set<SymbolT> & mobSet = symbols[rule.rhs[*]].first;
-    // For every following symbol
+    // ... get its follow set, ...
+    std::set<SymbolT> & followSet = symbols[rule.rhs[*]].follow;
+
+    // ... union it with the addSet, ...
     for ( j / jt)
-    {
-    }
-    // If we go off the end...
+      hasChanged = followSet.insert( ).second || hasChanged;
+
+    // ... clear the addSet if the symbol is non-nullable ...
+    // ... and add the symbol's first set to the addSet.
   }
 }
 

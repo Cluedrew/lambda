@@ -47,10 +47,12 @@ struct Element
     Application app;
   };
 
-  Element (ParseNode const &);
+  Element (ParseNode const *);
   /* Create a Element and any sub-Elements from a parse tree.
-   * Params: A constant reference to the root node of the parse tree.
+   * Params: A pointer to the root node of the parse tree.
    */
+
+  Element (Element const &);
 
   // The deconstructor should switch on type.
   ~Element ();

@@ -13,7 +13,7 @@
 // Constructors and Deconstructor ============================================
 // New Constructor ===========================================================
 // Construct an element from a ParseNode.
-Element::Element (ParseNode * node)
+Element::Element (ParseNode const * node)
 {
   if (!node->getHead() == SymbolEnum::ELEMENT)
   {
@@ -23,26 +23,26 @@ Element::Element (ParseNode * node)
 
   // Currently, to checking the first symbol is enough know exactly what
   //   Rule is being used.
-  switch (node->getISymbol(0))
+  switch (inner->getHead(0))
   {
   case SymbolEnum::FUNCTION:
     // ELEMENT FUNCTION / FUNCTION variable dot ELEMENT
     type = function;
-    ParseNode const & inner = node->child(0);
-    fun.head.id = inner.child(0).getText();
-    fun.body = new Element(&inner.child(2));
+    ParseNode const * inner = node->child(0);
+    fun.head.id = inner->child(0)->getText();
+    fun.body = new Element(inner->child(2));
     break;
   case SymbolEnum::APPLICATION:
     // ELEMENT APPLICATION / APPLICATION openApp ELEMENT ELEMENT closeApp
     type = application;
-    ParseNode const & inner = node->child(0);
-    app.lhs = new Element(&inner.child(1));
-    app.rhs = new Element(&inner.child(2));
+    ParseNode const * inner = node->child(0);
+    app.lhs = new Element(inner->child(1));
+    app.rhs = new Element(inner->child(2));
     break;
   case SymbolEnum::variable:
     // ELEMENT variable
     type = variable;
-    var.id = node->child(0).getText();
+    var.id = node->child(0)->getText();
     break;
   default:
     // FAULT! (false just means there was a BIG problem)
