@@ -2,6 +2,8 @@
 
 // Implementation of the ActionTable and ActionTableGenerator.
 
+#include <stdexcept>
+#include <iostream>
 #include "symbol.hpp"
 
 // ===========================================================================
@@ -14,217 +16,80 @@ ActionTable::ActionTable () :
 {}
 
 // Create and fill an ActionTable from a generator.
-ActionTable::ActionTable (ActionTableGenerator const &);
+ActionTable::ActionTable (ActionTableGenerator const & atg) :
+  data()
+{
+  ActionTable other = atg.generate();
+  data = other.data;
+}
 
-ActionTable::~ActionTable ();
+ActionTable::~ActionTable ()
+{}
 
 // Implementation Functions ==================================================
 // Replace all SROps in the ActionTable with those from a generator.
-ActionTable & ActionTable::operator= (ActionTableGenerator const & atg);
+ActionTable & ActionTable::operator= (ActionTableGenerator const & atg)
+{
+  ActionTable other = atg.generate();
+  if (atg.canGenerate())
+  {
+    data.clear();
+    data = other.data;
+  }
+  return *this;
+}
 
 // Check to see if a given state and transition symbol has a defined SROp.
-bool ActionTable::hasOp (StateT, SymbolT) const;
+bool ActionTable::hasOp (StateT state, SymbolT symbol) const
+{
+  return data.count(state) && data.find(state)->second.count(symbol);
+}
 
-// Get the SROp for a given state
-SROp ActionTable::getOp (StateT, SymbolT) const;
+// Get the SROp for a given state and transition symbol.
+SROp ActionTable::getOp (StateT state, SymbolT symbol) const
+{
+  // Check to make sure one is defined, return it if it exists.
+  if (!hasOp(state, symbol))
+    throw std::invalid_argument("ActionTable: cannot getOp for undefined Op");
+  return data.find(state)->second.find(symbol)->second;
+}
 
 // Set the operation for a given state and lookahead symbol.
-void ActionTable::setOp (StateT, SymbolT, SROp);
-
-// Remove an operation from the ActionTable.
-void ActionTable::delOp (StateT, SymbolT);
-
-// ===========================================================================
-// ActionTableGenerator ======================================================
-
-// Helper Structure SymbolData Constructor
-// Fills in the default values for a given symbol.
-ActionTableGenerator::SymbolData::SymbolData (SymbolT sym) :
-  nullable(false), first(), follow()
+void ActionTable::setOp (StateT state, SymbolT symbol, SROp sr)
 {
-  // Terminals are there own first set.
-  if (isTerminal(sym))
-    first.insert(sym);
-}
-
-// Constructors and Deconstructor ============================================
-// Create a basic ActionTableGenerator for the given CFG.
-ActionTableGenerator::ActionTableGenerator (CFGrammer cfg) :
-  data(), grammer(cfg), symbols()
-{
-  // Initialize the symbols map.
-  for (SymbolT isym = SymbolEnum::variable ; isym < cap ; ++isym)
-    symbols.insert(std::make_pair(isym, SymbolData(isym));
-
-  // Calculate the actual values for all symbols.
-  preformAllCalc();
-
-  // Calculate nullable
-  // A symbol is nullable if it:
-  // - Is the left hand side of a Rule with an empty right hand side.
-  // - Is the left hand side of a Rule that entirely nullable symbols.
-  // - Hence Terminals are never nullable.
-
-  // Calculate first
-  // The first set for a symbol S is:
-  // - If S is Terminal: itself.
-  // - If S is Nonterminal: the union of every first set of every symbol that
-  //   appears in the rhs of a Rule with S as the lhs and ever symbol before
-  //   the symbol on the rhs is nullable. (So always the first, the second if
-  //   the first is nullable, the third if the first and the second are...)
-
-  // Calculate follow
-  // The follow set for a symbol S is:
-  // - The union of first sets of symbols that follow S on the rhs of a Rule,
-  //   either directly or seperated by nullable symbols.
-  // - If S is the last symbol in a Rule's rhs (or all following symbols are
-  //   nullable) than also union the follow set of the Rule's lhs symbol.
-}
-
-ActionTableGenerator::~ActionTableGenerator ()
-{}
-
-// The Three Calculator Functions=============================================
-// Rule -> Boolean * rule to proccess -> did that change anything
-// Also they have to be run in order.
-
-bool ActionTableGenerator::calcNullable (Rule rule)
-{
-  // We never need to re-check nullable symbols.
-  if (isNullable(rule.lhs))
-    return false;
-
-  // Search for a non-nullable symbol in the rule,
-  // if none is found than the rule is nullable (or null).
-  bool mightNull = true;
-  for (unsigned int i = 0 ; i < rule.cr() ; ++i)
-    if (!isNullable(rule.rhs[i])
-      { mightNull = false; break; }
-
-  // If the rule was found to be nullable, the symbol is too.
-  if (mightNull)
+  // Is there a map for the state?
+  if (data.count(state))
   {
-    symbols[rule.lhs].nullable = true;
-    return true;
+    // Is there a mapped value for the symbol?
+    if (data[state].count(symbol))
+      // If so we can overwrite the old one.
+      data[state][symbol] = sr;
+    else
+      // If not create a new one.
+      data[state].insert(std::pair<SymbolT, SROp>(symbol, sr));
   }
   else
-    return false;
-}
-
-bool ActionTableGenerator::calcFirst (Rule rule)
-{
-  // The set we might modify and whether it has changed.
-  std::set<SymbolT> & firstSet = symbols[rule.lhs].first;
-  bool hasChanged = false;
-
-  // For each symbol in the rhs of the rule until we find a non-nullable one.
-  for (unsigned int i = 0 ; i < rule.cr() ; ++i)
   {
-    // Get the symbols first set
-    std::set<SymbolT> & innerSet = symbols[rule.rhs[i]].first;
-    // For each element in the symbols first set...
-    for (std::set<SymbolT>::const_iterator it = innerSet.cbegin()) ;
-         it != innerSet.cend() ; ++it)
-      // ... try adding it to the this first set and check the result.
-      hasChanged = firstSet.insert(*it).second || hasChanged;
-
-    // Break on non-null rhs symbol
-    if (!isNullable(rule.rhs[i])) break;
-  }
-
-  return hasChanged;
-}
-
-bool ActionTableGenerator::calcFollow (Rule rule)
-{
-  // Keep a look out for any changes.
-  bool hasChanged = false;
-
-  // The set of symbols to add, starts with the follow of the rhs.
-  std::set<SymbolT> addSet = symbols[rule.lhs].follow;
-
-  // Iterators: because their declarations are too long.
-  std::vector<SymbolT>::reverse_iterator it;
-  std::set<SymbolT>::iterator jt;
-
-  // For each symbol on the rhs ...
-  for (it = rule.rhs.rbegin() ; it != rule.rhs.rend() ; ++it))
-  {
-    // ... get its follow set ...
-    std::set<SymbolT> & followSet = symbols[*it].follow;
-
-    // ... union it with the addSet ...
-    for (jt = addSet.begin() ; jt != addSet.end() ; ++jt)
-      hasChanged = followSet.insert(*jt).second || hasChanged;
-
-    // ... clear the addSet if the symbol is non-nullable ...
-    if (!isNullable(*it))
-      addSet.clear();
-
-    // ... and add the symbol's first set to the addSet.
-    for (jt = symbols[*it].first.begin() ;
-         jt != symbols[*it].first.end() ; ++jt)
-      addSet.insert(*jt);
-  }
-
-  return hasChanged;
-}
-
-/* Call all of the calculation functions, in order and repeating each until
- *   they are stable and no more updates have to be made.
- */
-void ActionTableGenerator::preformAllCalc ()
-{
-#define REPEAT_OVER_RULES(calcFunc) \
-  do { \
-    bool change = false; \
-    for (std::set<Rule>::iterator it = grammer.rules.begin() ; \
-         it != grammer.rules.end() ; ++it) \
-      change =|| calcFunc(*it); \
-  } while (change);
-
-  REPEAT_OVER_RULES(calcNullable)
-  REPEAT_OVER_RULES(calcFirst)
-  REPEAT_OVER_RULES(calcFollow)
-
-#undef REPEAT_OVER_RULES
-}
-
-// Implementation Functions ==================================================
-// Check to see if a SymbolT can expand to nothing (an empty series).
-bool ActionTableGenerator::isNullable (SymbolT sym) const
-{ return symbols[sym].nullable; }
-
-// Get the set of symbols that can be first in an expantion of a SymbolT.
-std::set<SymbolT> ActionTableGenerator::firstSet (SymbolT sym) const
-{ return symbols[sym].first; }
-
-// Get the set of symbols that can be follow the expanition of a SymbolT.
-std::set<SymbolT> ActionTableGenerator::followSet (SymbolT sym) const
-{ return symbols[sym].follow; }
-
-// Create and return a new ActionTable from this generator.
-ActionTable ActionTableGenerator::generate () const
-{
-  if (!canGenerate())
-  {
-    printProblems(std::cerr);
-    throw ?;
+    // Make a map for the state and insert the (symbol -> sr) pair.
+    std::map<SymbolT, SROp> tmp;
+    tmp.insert(std::pair<SymbolT, SROp>(symbol, sr));
+    data.insert(std::pair<StateT, std::map<SymbolT, SROp> >(state, tmp));
   }
 }
 
-// Check to see if the instance can currantly generate an ActionTable.
-bool ActionTableGenerator::canGenerate () const
+// Remove an operation from the ActionTable.
+void ActionTable::delOp (StateT state, SymbolT symbol)
 {
-  // For every state in data:
-  for ()
-    // For every transition out of every state
-      for ()
-        // Is there 0 or 1 possible destinations
-        if (!)
-          // If not we can't generate an ActionTable.
-          return false;
+  // If the state's map doesn't exist there is nothing to delete.
+  if (data.count(state))
+  {
+    // If the symbol is defined in the map then we have to delete it.
+    if (data[state].count(symbol))
+    {
+      data[state].erase(symbol);
+      // If that was the last symbol in this map, remove the state map.
+      if (data[state].empty())
+        data.erase(state);
+    }
+  }
 }
-
-// Print the problems that prevent a ActionTable from being generated.
-void ActionTableGenerator::printProblems (std::ostream & out) const;

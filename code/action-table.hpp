@@ -9,14 +9,10 @@
  * definition of the CFG, or produce information on why one cannot be built.
  */
 
-#include <iosfwd>
 #include <map>
 #include "parse-fwd.hpp"
-#include "cfgrammer.hpp"
 #include "sr-op.hpp"
 class ActionTableGenerator;
-
-typedef int StateT;
 
 // The basic action table contains only the data used in the final calculation
 class ActionTable
@@ -55,88 +51,43 @@ public:
   /* Get the SROp for a given state
    * Params: The StateT and SymbolT lookup for an SROp.
    * Return: A copy of the SROp.
-   * Except:
+   * Except: Throws std::invalid_argument if the requested SROp does not
+   *   exist.
    */
 
   void setOp (StateT, SymbolT, SROp);
   /* Set the operation for a given state and lookahead symbol.
    * Params: The state identifer, the symbol identifier and the SROp to be
    *   performed there.
-   * Effect: Addes the given SROp to the ActionTable.
-   * Except:
+   * Effect: Addes the given SROp to the ActionTable, or changes an existing
+   *   SROp in the given position to match the new one.
    */
 
   void delOp (StateT, SymbolT);
   /* Remove an operation from the ActionTable.
    * Params: The StateT and SymbolT for an SROp.
-   * Effect: Removes the given SROp from the ActionTable.
-   * Except:
+   * Effect: Removes the given SROp from the ActionTable if it is defined.
    */
 };
 
 /* The ActionTableGenerator creates ActionTables for a given context-free
- * grammer. There maybe be some options to resolve problems.
+ * grammer. It is an pure virtual / abstract type.
  */
 class ActionTableGenerator
 {
 private:
-  std::map<StateT, std::map<SymbolT,std::vector<SROp> > > data;
-
-  CFGrammer const grammer;
-
-  struct SymbolData
-  {
-    SymbolData(SymbolT);
-    bool nullable;
-    std::set<SymbolT> first;
-    std::set<SymbolT> follow;
-  };
-  std::map<SymbolT, SymbolData> symbols;
-
-  bool calcNullable (Rule);
-  bool calcFirst (Rule);
-  bool calcFollow (Rule);
-  void preformAllCalc ();
-
 protected:
 public:
-  ActionTableGenerator (CFGrammer);
-  /* Create a basic ActionTableGenerator for the given CFG.
-   * Params: The definition of the context-free grammer.
-   */
+  virtual ~ActionTableGenerator () {};
 
-  virtual ~ActionTableGenerator ();
-
-  bool isNullable (SymbolT) const;
-  /* Check to see if a SymbolT can expand to nothing (an empty series).
-   * Params: The SymbolT to look up.
-   * Return: True if the SymbolT is nullable, false otherwise.
-   */
-  std::set<SymbolT> firstSet (SymbolT) const;
-  /* Get the set of symbols that can be first in an expantion of a SymbolT.
-   * Params: The SymbolT to get the first symbols for.
-   * Return: The set of first symbols.
-   */
-  std::set<SymbolT> followSet (SymbolT) const;
-  /* Get the set of symbols that can be follow the expanition of a SymbolT.
-   * Params: The SymbolT to get the follow symbols for.
-   * Return: The set of follow symbols.
-   */
-
-  ActionTable generate () const;
+  virtual ActionTable generate () const =0;
   /* Create and return a new ActionTable from this generator.
    * Except: Throws execption if an ActionTable cannot be created.
    */
 
-  bool canGenerate () const;
+  virtual bool canGenerate () const =0;
   /* Check to see if the instance can currantly generate an ActionTable.
    * Return: True if a table can be generated, false otherwise.
-   */
-  void printProblems (std::ostream &) const;
-  /* Print the problems that prevent a ActionTable from being generated.
-   * Params: Stream to print to.
-   * Effect: Characters are sent to stream.
-   * Format:
    */
 };
 

@@ -28,7 +28,7 @@ ParseNode::ParseNode (SymbolT head, std::vector<ParseNode*> & kids,
                       Rule const & rule) :
   head(head), children(), text()
 {
-  drain(chidren, kids);
+  drain(children, kids);
   // Double check the node was constructed properly.
   bool error = false;
   if (rule.lhs != head || children.size() != rule.cr())
@@ -79,7 +79,7 @@ Rule ParseNode::getRule () const
   Rule fin;
   fin.lhs = head;
   for (unsigned int i = 0 ; i < children.size() ; ++i)
-    fin.rhs.emplace_back(children[i].getHead());
+    fin.rhs.emplace_back(children[i]->getHead());
   return fin;
 }
 
@@ -89,7 +89,7 @@ SymbolT ParseNode::getHead () const
 
 // Get the head of the ith child, or the ith symbol of the Rule's rhs.
 SymbolT ParseNode::getISymbol (unsigned int i) const
-{ return children[i].getHead(); }
+{ return children[i]->getHead(); }
 
 // Get the text from a non-terminal node.
 TextT ParseNode::getText () const
@@ -105,7 +105,7 @@ static void drain(std::vector<ParseNode*> & dest,
   while (!source.empty())
   {
     dest.push_back(source.front());
-    source.pop_front();
+    source.erase(source.begin());
   }
 }
 
