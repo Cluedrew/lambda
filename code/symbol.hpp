@@ -15,22 +15,30 @@ enum class SymbolEnum : unsigned char
   // Token eof Symbol
   eof,
   // NonTerminal Symbols
+  INPUT,
+  PROGRAM,
+  ELEMENT,
+  FUNCTION,
+  APPLICATION,
   // Count Limit
   cap
 };
 
 // Is a terminal symbol.
-inline bool isTerminal (SymbolEnum sym);
+bool isTerminal (SymbolEnum sym);
 
 // Is a token kind. Equivilant to isTerminal.
-inline bool isTokenKind (SymbolEnum sym);
+bool isTokenKind (SymbolEnum sym);
 
 // Is a non-terminal symbol.
-inline bool isNonTerminal (SymbolEnum sym);
+bool isNonTerminal (SymbolEnum sym);
 
 // Is a symbol (either terminal or non-terminal).
 // The only not symbol in the type is the cap, provided for looping.
-inline bool isSymbol (SymbolEnum sym);
+bool isSymbol (SymbolEnum sym);
+
+// Get the eof symbol.
+SymbolEnum getEofSymbol ();
 
 // Standard print operator overload.
 std::ostream & operator<< (std::ostream & out, SymbolEnum sym);

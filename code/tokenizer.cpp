@@ -53,7 +53,7 @@ struct TokenStreamCore
 };
 
 // A copy of the eof token for easy access and retrival.
-Token const TokenStreamCore::eofToken = Token{SymbolT::eof, '\0'};
+Token const TokenStreamCore::eofToken = Token{getEofSymbol(), '\0'};
 
 // Turns a vector into a stream.
 class TokStrVectorWrapper

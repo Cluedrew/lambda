@@ -27,6 +27,12 @@ bool isNonTerminal (SymbolEnum sym)
 bool isSymbol (SymbolEnum sym)
 { return sym < SymbolEnum::cap; }
 
+// Getter --------------------------------------------------------------------
+
+// Get the eof symbol.
+SymbolEnum getEof ()
+{ return SymbolEnum::eof; }
+
 // In/Output Functions -------------------------------------------------------
 
 // Standard print operator overload.
@@ -42,6 +48,11 @@ std::ostream & operator<< (std::ostream & out, SymbolEnum sym)
   SYMTOSTR(openApp)
   SYMTOSTR(closeApp)
   SYMTOSTR(eof)
+  SYMTOSTR(INPUT)
+  SYMTOSTR(PROGRAM)
+  SYMTOSTR(ELEMENT)
+  SYMTOSTR(FUNCTION)
+  SYMTOSTR(APPLICATION)
 
 #undef SYMTOSTR
 
@@ -66,6 +77,11 @@ std::istream & operator>> (std::istream & in, SymbolEnum & sym)
   else STRTOSYM(openApp)
   else STRTOSYM(closeApp)
   else STRTOSYM(eof)
+  else STRTOSYM(INPUT)
+  else STRTOSYM(PROGRAM)
+  else STRTOSYM(ELEMENT)
+  else STRTOSYM(FUNCTION)
+  else STRTOSYM(APPLICATION)
 
 #undef STRTOSYM
 

@@ -94,7 +94,7 @@ CFGrammer defineCFGrammer (std::istream & in)
 What would a 'prefix free' programming language look like.
 
 Define a subset of the symbols to be final symbols.
-- The starting symbol must be a terminal symbol.
+- The starting symbol must be a final symbol.
 - No final symbol may appear anywhere in any production rule except if:
   - The lhs is a non-terminal final symbol.
   - The last symbol on the rhs is a final symbol (terminal or nonterminal).

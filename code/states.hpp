@@ -2,18 +2,17 @@
 #define STATES_HPP
 
 /* Defining a generic state machine that can be used in other calculations.
+ * Because it may actually be used in multiple places in the code base it is
+ * a template to allow for different types to be used.
  *
- * This is similar to a dirrected graph.
+ * This is similar to a dirrected graph, and uses some of the terminoligy
+ * where simplified.
  */
 
-typedef ? state_t;
-typedef ? trans_t;
-typedef ? payload_t;
-
 #include <set>
+#include <map>
 #include <vector>
 
-// Will this have to be a template?
 template<typename StateT_, typename TransT_, typename PayLoadT_>
 struct StateMachine
 {

@@ -33,6 +33,8 @@ bool isTokenKind (SymbolT);
 bool isNonTerminal (SymbolT);
 // Is a symbol (either terminal or non-terminal).
 bool isSymbol (SymbolT);
+// Get the eof symbol.
+SymbolT getEofSymbol ();
 
 // The token type: full definition of the structure that reperents tokens.
 class Token;

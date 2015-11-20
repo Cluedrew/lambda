@@ -1,9 +1,11 @@
 #include "slr1-atg.hpp"
 
-// ===========================================================================
-// Slr1Atg ======================================================
+// Implementation of Slr1Atg
+// The access functions and the massive calculations.
 
-// Helper Structure SymbolData Constructor
+#include "states.hpp"
+
+// Helper Structure SymbolData Constructor ===================================
 // Fills in the default values for a given symbol.
 Slr1Atg::SymbolData::SymbolData (SymbolT sym) :
   nullable(false), first(), follow()
@@ -11,6 +13,7 @@ Slr1Atg::SymbolData::SymbolData (SymbolT sym) :
   // Terminals are there own first set.
   if (isTerminal(sym))
     first.insert(sym);
+  // ? The starting symbol has the eof in its follow set.
 }
 
 // Constructors and Deconstructor ============================================
@@ -136,6 +139,36 @@ bool Slr1Atg::calcFollow (Rule rule)
   return hasChanged;
 }
 
+// Callculate the SROps using nullable, first & follow -----------------------
+void calcOperations ()
+{
+  // This is not simply, infact I use a state machine to make it work.
+  StateMachine<StateT, SymbolT, std::vector<Item> > states;
+  /* Each state is the set of Items we could be proccessing.
+   * Transitions out of a state repersent shift operations that would
+   * progress an Item (or Items) in the state. The starting state starts with
+   * just the fresh Item of the starting symbols rules (?).
+   *
+   * After a new State is created for all Rules that are about to read in a
+   * non-terminal symbol the fresh Item for every rule with that symbol on the
+   * lhs. Recusively if needed.
+   *
+   * Actually this part, generating the StateGraph, might be worth taking out.
+   */
+
+  // Keep a counter, that holds the value of the next state we would make
+  // if we need to make a new on. Update with increment.
+  StateT nextState = 0;
+
+  /* After the state graph has been generated the graph can be used to define
+   * most (all?) the shift operations, one for each transition in the graph.
+   * Reduce operations require the follow sets. Each time a "Full Item" is
+   * encountered in a state a reduce operation is defined from that state, by
+   * each symbol in the Item's lhs, for the Item's base Rule.
+   */
+}
+
+// ---------------------------------------------------------------------------
 /* Call all of the calculation functions, in order and repeating each until
  *   they are stable and no more updates have to be made.
  */
