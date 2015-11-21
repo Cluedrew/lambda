@@ -10,20 +10,35 @@
  * I make no promise that is how it "actually" works, but that is how it works
  * here, in this program.
  *
- * The ActionTableGenerator creates ActionTables for a given context-free
- * grammer. There maybe be some options to resolve problems.
+ *   This ActionTableGenerator will generate a set of shift/reduce operations
+ * from a given context free grammer. It will create shift operations to move
+ * along the Prodctition Rules and reduce operations to convert the right hand
+ * side into the left hand side.
+ *   Also it will handle the eof symbol as a special case. Even if it does not
+ * appear in any rules it will be assumed to follow the start symbol and
+ * the parsing should be complete when a single start symbol has been read in
+ * and the eof is next.
+ *   For this reason if you use this genertor neither the start nor eof symbol
+ * should appear on the right hand side of rules. That can generate conflict.
  */
 
 #include <iosfwd>
+#include <map>
+#include <set>
+#include <vector>
+#include "parse-fwd.hpp"
 #include "action-table.hpp"
 #include "cfgrammer.hpp"
+#include "states.hpp"
+#include "rule-item.hpp"
 
 class Slr1Atg : public ActionTableGenerator
 {
 private:
-  std::map<StateT, std::map<SymbolT,std::vector<SROp> > > data;
-
   CFGrammer const grammer;
+  std::map<std::pair<StateT,SymbolT>, std::vector<SROp> > data;
+//std::map<StateT, std::map<SymbolT,std::vector<SROp> > > data;
+  StateMachine<StateT, SymbolT, std::vector<Item> > stateGraph;
 
   struct SymbolData
   {
@@ -34,9 +49,14 @@ private:
   };
   std::map<SymbolT, SymbolData> symbols;
 
+  // SymbolData Calculators.
   bool calcNullable (Rule);
   bool calcFirst (Rule);
   bool calcFollow (Rule);
+
+  void calcStateGraph ();
+  void calcOperations ();
+
   void preformAllCalc ();
 
 protected:

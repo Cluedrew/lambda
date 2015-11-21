@@ -90,6 +90,35 @@ CFGrammer defineCFGrammer (std::istream & in)
   return fin;
 }
 
+// Iterators =================================================================
+// A thought experament: going through rules for something that matches the
+// for rules that match the left hand side is common.
+class MatchLeftIterator
+{
+private:
+  SymbolT match;
+  std::set<Rule>::iterator at;
+  std::set<Rule>::iterator end;
+protected:
+  MatchLeftIterator(SymbolT match, CFGrammer grammer) :
+    match(match), at(grammer.begin()), end(grammer.end())
+  {}
+
+  bool isNotEnd ()
+  { return at != end; }
+
+  MatchLeftIterator & operator++ ()
+  {
+    do ++at while (at->lhs != match && at != end);
+    return *this;
+  }
+
+  Rule & operator* ()
+  { return *at; }
+  Rule * operator-> ()
+  { return at->; }
+};
+
 /*
 What would a 'prefix free' programming language look like.
 

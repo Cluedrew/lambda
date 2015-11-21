@@ -5,17 +5,6 @@
 
 #include "states.hpp"
 
-// Helper Structure SymbolData Constructor ===================================
-// Fills in the default values for a given symbol.
-Slr1Atg::SymbolData::SymbolData (SymbolT sym) :
-  nullable(false), first(), follow()
-{
-  // Terminals are there own first set.
-  if (isTerminal(sym))
-    first.insert(sym);
-  // ? The starting symbol has the eof in its follow set.
-}
-
 // Constructors and Deconstructor ============================================
 // Create a basic Slr1Atg for the given CFG.
 Slr1Atg::Slr1Atg (CFGrammer cfg) :
@@ -24,8 +13,10 @@ Slr1Atg::Slr1Atg (CFGrammer cfg) :
   // Initialize the symbols map.
   for (SymbolT isym = SymbolEnum::variable ; isym < cap ; ++isym)
     symbols.insert(std::make_pair(isym, SymbolData(isym));
+  // Includes added the eof to the start symbol's follow set.
+  symbols[cfg.start].follow.insert(getEofSymbol());
 
-  // Calculate the actual values for all symbols.
+  // Calculate the fill in all the SymbolData for all symbols.
   preformAllCalc();
 
   // Calculate nullable
@@ -53,7 +44,18 @@ Slr1Atg::Slr1Atg (CFGrammer cfg) :
 Slr1Atg::~Slr1Atg ()
 {}
 
-// The Three Calculator Functions=============================================
+// ===========================================================================
+// Helper Structure SymbolData Constructor -----------------------------------
+// Fills in the default values for a given symbol.
+Slr1Atg::SymbolData::SymbolData (SymbolT sym) :
+  nullable(false), first(), follow()
+{
+  // Terminals are there own first set.
+  if (isTerminal(sym))
+    first.insert(sym);
+}
+
+// The Three SymbolData Calculator Functions ---------------------------------
 // Rule -> Boolean * rule to proccess -> did that change anything
 // Also they have to be run in order.
 
@@ -139,11 +141,58 @@ bool Slr1Atg::calcFollow (Rule rule)
   return hasChanged;
 }
 
-// Callculate the SROps using nullable, first & follow -----------------------
-void calcOperations ()
+// ===========================================================================
+// Fill a state from its kurnal to a complete state.
+void fillState (std::vector<Item> & state)
 {
-  // This is not simply, infact I use a state machine to make it work.
-  StateMachine<StateT, SymbolT, std::vector<Item> > states;
+  // For each Item in the state ...
+  for (unsigned int i = 0 ; i < state.size() ; ++i)
+  {
+    Item & item = state[i];
+    // if there is a next symbol for the item.
+    if (item.cr() == item.place)
+      continue;
+    // and the next symbol is a nonTerminal.
+    SymbolT curSym = item.rhs[item.place];
+    if (isNonTerminal(curSym))
+    {
+      // add a fresh item for each Rule with the currant symbol as the lhs.
+      !
+    }
+  }
+}
+
+//
+void calcStateGraph ()
+{
+  // Fill in the stateGraph.
+
+  // Possibly insert some code to drain the graph so this doesn't break
+  // everything if it is called twice.
+
+  // Keep a counter, that holds the value of the next state we would make
+  // if we need to make a new on. Update with increment.
+  StateT nextState = 0;
+
+  // Set up the starting state.
+  stateGraph.start = nextState;
+  stateGraph.addState(nextState);
+  //add all rules with starting symbol on the lhs to the graph.
+  ++nextState;
+
+  // Set up the end state.
+  stateGraph.addState(nextState);
+  data.insert(std::pair<std::pair<StateT, SymbolT> std::vector<SROp> >
+              (std::pair<StateT, SymbolT>(nextState, getEofSymbol()),
+               SROp::doneOp()));
+  ++nextState;
+
+  // Loop to create the remaining states.
+  // Process each state by progressing items by one.
+  for (StateT proc = 0 ; proc < nextState ; ++proc)
+  {
+  }
+
   /* Each state is the set of Items we could be proccessing.
    * Transitions out of a state repersent shift operations that would
    * progress an Item (or Items) in the state. The starting state starts with
@@ -155,11 +204,11 @@ void calcOperations ()
    *
    * Actually this part, generating the StateGraph, might be worth taking out.
    */
+}
 
-  // Keep a counter, that holds the value of the next state we would make
-  // if we need to make a new on. Update with increment.
-  StateT nextState = 0;
-
+// Callculate the SROps using nullable, first & follow -----------------------
+void calcOperations ()
+{
   /* After the state graph has been generated the graph can be used to define
    * most (all?) the shift operations, one for each transition in the graph.
    * Reduce operations require the follow sets. Each time a "Full Item" is
@@ -168,7 +217,7 @@ void calcOperations ()
    */
 }
 
-// ---------------------------------------------------------------------------
+// ===========================================================================
 /* Call all of the calculation functions, in order and repeating each until
  *   they are stable and no more updates have to be made.
  */

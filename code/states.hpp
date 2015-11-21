@@ -18,9 +18,9 @@ struct StateMachine
 {
   struct Edge
   {
-    StateT from;
-    TransT by;
-    StateT to;
+    StateT_ from;
+    TransT_ by;
+    StateT_ to;
   };
 
   std::set<StateT_> states;
@@ -28,8 +28,14 @@ struct StateMachine
   std::vector<Edge> transitions;
   StateT start;
 
-  bool isState (StateT_ state) const
-  { return states.count(state); }
+  bool isState (StateT_ state) const;
+  // Check to see if a given state identifer is defined.
+
+  bool addState (StateT_ state);
+  // Attempt to add a new state with the default payload, return success.
+
+  StateT_ getDest (StateT_ from, TransT_ by)
+  // Get the destination of a movement from a state by a transition.
 };
 
-#define STATES_HPP
+#endif//STATES_HPP

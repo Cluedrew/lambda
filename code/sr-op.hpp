@@ -9,7 +9,14 @@
 
 struct SROp
 {
-  int siftReduce;
+  enum SROpType
+  {
+    shift,
+    reduce,
+    done//,
+    //error
+  } type;
+
   StateT to;
 
   bool isShift ();
@@ -22,6 +29,10 @@ struct SROp
   int reduceSize ();
   /* The number of the proceding simples reduced into one.
    */
+
+  SROp doneOp ();
+  { return SROp{done, 0}; }
+  // Get a new done SROp.
 };
 
 #endif//SR_OP_HPP

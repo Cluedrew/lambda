@@ -10,6 +10,7 @@
 #include "parse-fwd.hpp"
 #include "rule-item.hpp"
 
+// Main class
 struct CFGrammer
 {
   std::set<SymbolT> nonTerminals;
