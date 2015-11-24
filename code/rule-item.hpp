@@ -7,6 +7,7 @@
 #include <iosfwd>
 #include <vector>
 #include "parse-fwd.hpp"
+struct Item;
 
 // The production Rule
 struct Rule
@@ -15,16 +16,24 @@ struct Rule
   std::vector<SymbolT> rhs;
   unsigned int cr () const; // count right, rhs.size()
   bool operator< (Rule const &) const;
+
+  // Return a fresh item from this production Rule.
+  Item getFresh ();
 };
 
 // The Item
-struct Item
+struct Item // : public Rule
 {
   SymbolT lhs;
   std::vector<SymbolT> rhs;
   unsigned int place; // In the range of [0..cr()]
   unsigned int cr () const; // count right, rhs.size()
   bool operator< (Item const &) const;
+
+  // Return the base production Rule of the item.
+  Rule getBase ();
+  // Return a new Item that is this item progressed by one.
+  Item getNext ();
 };
 
 std::ostream & operator<< (std::ostream &, Rule const &);

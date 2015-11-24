@@ -65,3 +65,21 @@ std::ostream & operator<< (std::ostream & out, Item const & item)
     out << " " << item.rhs[i];
   return out;
 }
+
+// Get a fresh Item from a Rule
+Item Rule::getFresh ()
+{
+  return Item{lhs, rhs, 0};
+}
+
+// Get the base Rule for this Item.
+Rule Item::getBase ()
+{
+  return Rule{lhs, rhs};
+}
+
+// Get a new Item that is this Item progressed by one.
+Item Item::getNext ()
+{
+  return Item{lhs, rhs, place + 1};
+}

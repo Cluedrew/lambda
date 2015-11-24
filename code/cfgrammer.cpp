@@ -71,7 +71,7 @@ static Rule lineToRule (std::istringstream & ss)
 }
 
 // Create a CFGrammer from a text definition.
-CFGrammer defineCFGrammer (std::istream & in)
+CFGrammer CFGrammer::defineFromText (std::istream & in)
 {
   CFGrammer fin;
 

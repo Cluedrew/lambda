@@ -26,20 +26,27 @@ struct SROp
     //error
   } type;
 
-  StateT to; // Union with by: a look up for the reduction rule.
+  union
+  {
+    StateT to;
+    _rule_type_ by;
+  }
 
   bool isShift ();
   bool isReduce ();
+  bool isDone ();
   /* Check to see if it is a shift or a reduce operation.
    * Return: True if the operation is of the given type, false if it is
-   *   of the other type.
+   *   of a different other type.
    */
 
-  int reduceSize ();
-  /* The number of the proceding simples reduced into one.
-   */
+  SROp shiftOp (StateT destination);
+  // Create a new shift SROp and return it.
 
-  SROp doneOp ();
+  SROp reduceOp (_rule_type_ proRule);
+  // Create a new reduce SROp and return it.
+
+  SROp doneOp ()
   { return SROp{done, 0}; }
   // Get a new done SROp.
 };
