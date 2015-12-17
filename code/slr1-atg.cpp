@@ -14,7 +14,7 @@ Slr1Atg::Slr1Atg (CFGrammer cfg) :
   for (SymbolT isym = SymbolEnum::variable ; isym < cap ; ++isym)
     symbols.insert(std::make_pair(isym, SymbolData(isym));
   // Includes added the eof to the start symbol's follow set.
-  symbols[cfg.start].follow.insert(getEofSymbol());
+  symbols[grammer.start].follow.insert(getEofSymbol());
 
   // Calculate the fill in all the SymbolData for all symbols.
   preformAllCalc();
@@ -99,7 +99,7 @@ bool Slr1Atg::calcFirst (Rule rule)
       // ... try adding it to the this first set and check the result.
       hasChanged = firstSet.insert(*it).second || hasChanged;
 
-    // Break on non-null rhs symbol
+    // Break on non-null rhs symbol.
     if (!isNullable(rule.rhs[i])) break;
   }
 
@@ -119,12 +119,12 @@ bool Slr1Atg::calcFollow (Rule rule)
   std::set<SymbolT>::iterator jt;
 
   // For each symbol on the rhs ...
-  for (it = rule.rhs.rbegin() ; it != rule.rhs.rend() ; ++it))
+  for (it = rule.rhs.rbegin() ; it != rule.rhs.rend() ; ++it)
   {
     // ... get its follow set ...
     std::set<SymbolT> & followSet = symbols[*it].follow;
 
-    // ... union it with the addSet ...
+    // ... union (assign) the follow set with the addSet ...
     for (jt = addSet.begin() ; jt != addSet.end() ; ++jt)
       hasChanged = followSet.insert(*jt).second || hasChanged;
 
@@ -149,20 +149,33 @@ void fillState (std::vector<Item> & state)
   for (unsigned int i = 0 ; i < state.size() ; ++i)
   {
     Item & item = state[i];
-    // if there is a next symbol for the item.
-    if (item.cr() == item.place)
-      continue;
-    // and the next symbol is a nonTerminal.
+    // ... if there is a next symbol for the item...
+    if (item.cr() == item.place) continue;
+    // ... and the next symbol is a nonTerminal.
     SymbolT curSym = item.rhs[item.place];
     if (isNonTerminal(curSym))
     {
-      // add a fresh item for each Rule with the currant symbol as the lhs.
-      !
+      // Then add a fresh item for each Rule with
+      //   the currant symbol as the lhs.
+      for (MatchLeftIterator it(curSym, grammer) ; it.isNotEnd() ; ++it)
+      {
+        // Get the fresh item.
+        Item const freshItem = it->getFresh();
+        // Make sure this is not a repeat.
+        bool unique = true;
+        for (std::vector<Item>::const_iterator jt = state.cbegin() ;
+            jt != state.cend ; ++jt)
+          if (freshItem == *jt)
+            { unique = false; break; }
+        // If this is unique for this state at it to the state.
+        if (unique) state.push_back(freshItem);
+      }
     }
   }
 }
 
-//
+// Create a StateGraph that shows possible states of the stack and what
+// parse rules can be ongoing at that time.
 void calcStateGraph ()
 {
   // Fill in the stateGraph.
@@ -174,23 +187,44 @@ void calcStateGraph ()
   // if we need to make a new on. Update with increment.
   StateT nextState = 0;
 
-  // Set up the starting state.
+  // ===== Beginning and End State Set Up =====
+  // The trick is to set up these special cases so they don't conflict
+  // with the regular generation.
+  /* Set up the starting state.
+   * In the psuedo-argumented version the starting state's kernal is:
+   *   -> * S eof
+   * Where S is the starting symbol. Now this rule doesn't exist, but the
+   * rest of the system doesn't care.
+   */
   stateGraph.start = nextState;
   stateGraph.addState(nextState);
   //add all rules with starting symbol on the lhs to the graph.
   ++nextState;
 
-  // Set up the end state.
+  /* Set up the end state.
+   * Psuedo-argumented end state is: -> S * eof
+   * It is never reduced and the eof is never shifted, the only operation
+   * used here is done.
+   */
   stateGraph.addState(nextState);
   data.insert(std::pair<std::pair<StateT, SymbolT> std::vector<SROp> >
               (std::pair<StateT, SymbolT>(nextState, getEofSymbol()),
                SROp::doneOp()));
   ++nextState;
 
+  // ===== Intermediate State Set Up =====
   // Loop to create the remaining states.
   // Process each state by progressing items by one.
   for (StateT proc = 0 ; proc < nextState ; ++proc)
   {
+    // For each symbol, for every item in the state that is advanced
+    // by shifting that symbol, get the next Item and create a new
+    // state kernal from that.
+    // Fill the kernal and check to see if it is equal to any existing
+    // state.
+    // If so add a transition from the currant state to that state.
+    // If not add it to the list of states. ++nextState. This will include
+    // a transition as well.
   }
 
   /* Each state is the set of Items we could be proccessing.
@@ -228,7 +262,7 @@ void Slr1Atg::preformAllCalc ()
     bool change = false; \
     for (std::set<Rule>::iterator it = grammer.rules.begin() ; \
          it != grammer.rules.end() ; ++it) \
-      change =|| calcFunc(*it); \
+      change = calcFunc(*it) || change; \
   } while (change);
 
   REPEAT_OVER_RULES(calcNullable)

@@ -54,7 +54,10 @@ private:
   bool calcFirst (Rule);
   bool calcFollow (Rule);
 
+  // stateGraph Calculators.
+  void fillState (std::vector<Item> & state);
   void calcStateGraph ();
+
   void calcOperations ();
 
   void preformAllCalc ();

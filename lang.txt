@@ -27,11 +27,12 @@ far as the user is conserned. Internally, with the addition of a 'done' shift/
 reduce operation we may not need any special cases either, it would be
 incorperated into the set up and run normally.
 
-### Defining Rules:
+### Note: This is for the not psudo-argumented version.
 
+### Defining Rules:
 Terminal Symbols : tokens (followed by their regex)
 dot .
-variable [:lower:]
+variable [[:lower:]]
 openApp (
 closeApp )
 eof
@@ -51,6 +52,7 @@ ELEMENT APPLICATION
 ELEMENT variable
 FUNCTION variable dot ELEMENT
 APPLICATION openApp ELEMENT ELEMENT closeApp
+
 
 Starting Symbol:
 INPUT

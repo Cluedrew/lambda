@@ -51,7 +51,27 @@ static std::set<T> streamToSet
   return fin;
 }
 
-// The mapping funtions:
+// Convert a character stream into a verctor.
+template<typename T>
+static std::vector<T> streamToVector
+    (T (*mapping)(std::istringstream &), std::istream & in)
+{
+  // Get the size of the vector.
+  std::istringstream & tmp = getGoodLine(in);
+  int n;
+  tmp >> n;
+
+  // Create the set to return.
+  std::vector<T> fin;
+
+  // Insert all the elements into the set.
+  for (int i = 0 ; i < n ; ++i)
+    fin.push_back(mapping(getGoodLine(in)));
+
+  return fin;
+}
+
+// Mapping Funtions ==========================================================
 // Get a single symbol from the front of the stream and discard the rest.
 static SymbolT lineToSymbolT (std::istringstream & ss)
 {
@@ -59,6 +79,7 @@ static SymbolT lineToSymbolT (std::istringstream & ss)
   ss >> fin;
   return fin;
 }
+
 // Read in symbols from the line, the first is the lhs, the rest the rhs.
 static Rule lineToRule (std::istringstream & ss)
 {
@@ -70,6 +91,7 @@ static Rule lineToRule (std::istringstream & ss)
   return rule;
 }
 
+// Make a CFG ================================================================
 // Create a CFGrammer from a text definition.
 CFGrammer CFGrammer::defineFromText (std::istream & in)
 {
@@ -85,7 +107,7 @@ CFGrammer CFGrammer::defineFromText (std::istream & in)
   fin.start = lineToSymbolT(getGoodLine(in));
 
   // Production Rules
-  fin.rules = streamToSet<Rule>(lineToRule, in);
+  fin.rules = streamToVector<Rule>(lineToRule, in);
 
   return fin;
 }
@@ -93,31 +115,33 @@ CFGrammer CFGrammer::defineFromText (std::istream & in)
 // Iterators =================================================================
 // A thought experament: going through rules for something that matches the
 // for rules that match the left hand side is common.
-class MatchLeftIterator
+// (I ended up trying to make a general version called the filter-iterator.)
+MatchLeftIterator::MatchLeftIterator(SymbolT match, CFGrammer grammer) :
+  match(match), at(grammer.rules.begin()), end(grammer.rules.end())
 {
-private:
-  SymbolT match;
-  std::set<Rule>::iterator at;
-  std::set<Rule>::iterator end;
-protected:
-  MatchLeftIterator(SymbolT match, CFGrammer grammer) :
-    match(match), at(grammer.begin()), end(grammer.end())
-  {}
+  while (at != end && at->lhs != match) ++at;
+}
 
-  bool isNotEnd ()
-  { return at != end; }
+bool MatchLeftIterator::isNotEnd ()
+{ return at != end; }
 
-  MatchLeftIterator & operator++ ()
-  {
-    do ++at while (at->lhs != match && at != end);
-    return *this;
-  }
+MatchLeftIterator & MatchLeftIterator::operator++ ()
+{
+  do {++at;} while (at != end && at->lhs != match);
+  return *this;
+}
 
-  Rule & operator* ()
-  { return *at; }
-  Rule * operator-> ()
-  { return at->; }
-};
+MatchLeftIterator MatchLeftIterator::operator++ (int)
+{
+  MatchLeftIterator tmp = *this;
+  do {++at;} while (at != end && at->lhs != match);
+  return tmp;
+}
+
+Rule & MatchLeftIterator::operator* ()
+{ return at.operator*(); }
+Rule * MatchLeftIterator::operator-> ()
+{ return at.operator->(); }
 
 /*
 What would a 'prefix free' programming language look like.
@@ -151,7 +175,7 @@ bool checkPrefexFree (CFGrammer cfg)
     waiting.pop();
 
     // Iterate across all Rules in the language.
-    for (std::set<Rule>::const_iterator rit = cfg.rules.cbegin() ;
+    for (std::vector<Rule>::const_iterator rit = cfg.rules.cbegin() ;
          rit != cfg.rules.cend() ; ++rit)
     {
       // If a rule's lhs matches...
@@ -175,7 +199,7 @@ bool checkPrefexFree (CFGrammer cfg)
 
   // That builds a set of all final symbols, now make sure they never appear
   // in the middle of of Rule. Go through all rules.
-  for (std::set<Rule>::const_iterator rit = cfg.rules.cbegin() ;
+  for (std::vector<Rule>::const_iterator rit = cfg.rules.cbegin() ;
        rit != cfg.rules.cend() ; ++rit)
   {
     // And all middle places in the rules.

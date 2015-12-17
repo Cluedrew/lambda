@@ -28,9 +28,10 @@ struct SROp
 
   union
   {
-    StateT to;
-    _rule_type_ by;
-  }
+    StateT shiftTo;
+    // Is this to 'brittle'? It will break if the rules are ever moved.
+    Rule * reduceBy;
+  };
 
   bool isShift ();
   bool isReduce ();
@@ -43,7 +44,7 @@ struct SROp
   SROp shiftOp (StateT destination);
   // Create a new shift SROp and return it.
 
-  SROp reduceOp (_rule_type_ proRule);
+  SROp reduceOp (Rule * proRule);
   // Create a new reduce SROp and return it.
 
   SROp doneOp ()

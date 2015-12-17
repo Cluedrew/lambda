@@ -1,117 +1,61 @@
 #ifndef ELEMENT_HPP
 #define ELEMENT_HPP
 
-/* Reperesents an element in my lambda caluclator.
+// Will replace "element.hpp" as the parser progresses.
+
+/* A new approch to the Elements. Not only is it devided up a little bit
+ * differently, but it is designed to take advantage of the parse tree.
  */
 
-#include <vector>
-#include <string>
-#include <iosfwd>
-struct SubstutionOp;
-struct Token;
+#include "parse-fwd.hpp"
+class ParseNode;
 
-class Element
+struct Element
 {
-private:
-  char core;
-  Element * lhs;
-  Element * rhs;
+  // Internal Definitions:
+  enum ElementType
+  {
+    function,
+    variable,
+    application
+  };
 
-  void construct (char const *, int &);
+  struct Variable
+  {
+    TextT id;
+  };
 
-protected:
-public:
-  Element (char, Element *, Element *);
-  // By field constructor, for internal use only.
+  struct Function
+  {
+    Variable head;
+    Element * body;
+  };
 
-  Element (char);
-  /* Parameter constructor, short cut to the given parameter.
-   * Params: A char value to repersent the parameter.
+  struct Application
+  {
+    Element * lhs;
+    Element * rhs;
+  };
+
+  // Fields:
+  ElementType type;
+
+  union
+  {
+    Function fun;
+    Variable var;
+    Application app;
+  };
+
+  Element (ParseNode const *);
+  /* Create a Element and any sub-Elements from a parse tree.
+   * Params: A pointer to the root node of the parse tree.
    */
 
-public:
-  Element (std::vector<Token> const &, int &);
-  /* Token Constructor, works like the string constructors and is temperary
-   * as I begin the language converion.
-   */
-
-  Element (char const *);
-  /* Create an element from a string.
-   * Params: A pointer to an array of characters.
-   * NOTE: Currantly the syntax is very unforgiving.
-   */
-
-  Element (char const *, int &);
-  /* Create an element from part of a string.
-   * Params: A pointer to an array of characters an a reference to a offset,
-   *   reading will start from the offset.
-   * Effect: Advances the offset to one past the end of the characters used
-   *   to create this element.
-   * NOTE: Currantly the syntax is very unforgiving.
-   */
-
-  // Copy Constructor (Deep Copy)
   Element (Element const &);
 
-  virtual ~Element ();
-
-  bool isFunction () const;
-  bool isEvaluation () const;
-  bool isParameter () const;
-  /* Check to see if the element is of the given type.
-   * Return: True if the element is of the type in the function name,
-   *   false otherwise.
-   */
-
-  bool isClosed () const;
-  /* Check to see if the element is closed.
-   * Return: True if closed, false otherwise. For each type of element:
-   * - Parameters are not closed and always returns false.
-   * - Evaluations are closed if both of their sides are closed.
-   * - Functions are closed if all parameters within them are bound to a
-   *   function header above them.
-   */
-  bool isClosedWith (std::string) const;
-  /* Check to see if the element is closed within a given context.
-   * Params: A list of bound parameters within the given context.
-   * Return: True if closed, false otherwise. For each type of element:
-   * - Parameters are closed if they appear in the list.
-   * - Evaluations are closed if both of their sides are closed.
-   * - Functions are closed if all parameters within them are bound to a
-   *   parameter within the list or a header within the function.
-   */
-
-  bool isExpretion () const;
-  /* Check to see if the element is an expretion.
-   * Return: By the type of element:
-   * - Parameters are not exprestions and return false.
-   * - Evaluations are exprestions if both of their sides are expretions.
-   * - Functions are exprestions if they are closed, equivilant to isClosed().
-   */
-
-  Element * evaluate () const;
-  /* Get the result of an evaluation on the exprestion.
-   * Return: A pointer to the element that results from the evaluation. Caller
-   *   must free.
-   */
-  Element * apply (Element *) const;
-  /* Get the result of an application on a function.
-   * Params:
-   * Return: A pointer to the element that results from the application.
-   *   Caller must free.
-   */
-  Element * substute (SubstutionOp &) const;
-  /* Get the result of a substution on an element.
-   * Params:
-   * Return: A pointer to the element that results from the substution. Caller
-   *   must free.
-   */
-
-  void print (std::ostream &);
-  /* Print the element to the given stream.
-   * Params: A standard output stream to print to.
-   * Effect: Characters are sent to the stream.
-   */
+  // The deconstructor should switch on type.
+  ~Element ();
 };
 
 #endif//ELEMENT_HPP

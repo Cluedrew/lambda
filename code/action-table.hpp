@@ -18,7 +18,8 @@ class ActionTableGenerator;
 class ActionTable
 {
 private:
-  std::map<StateT, std::map<SymbolT,SROp> > data;
+  //std::map<StateT, std::map<SymbolT,SROp> > data;
+  std::map<std::pair<StateT, SymbolT>, SROp> data;
 
 protected:
 public:
