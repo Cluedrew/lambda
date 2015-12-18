@@ -7,35 +7,61 @@
  *
  * This is similar to a dirrected graph, and uses some of the terminoligy
  * where simplified.
+ *
+ * States
  */
 
 #include <set>
 #include <map>
 #include <vector>
+#include <functional>
+#include "parse-fwd.hpp" // Defines StateT
 
-template<typename StateT_, typename TransT_, typename PayLoadT_>
-struct StateMachine
+template<typename LabelT_, typename TransT_,
+         typename LabelEquals = equal_to<LabelT_> >
+class StateMachine
 {
-  struct Edge
+private:
+  struct StateData
   {
-    StateT_ from;
-    TransT_ by;
-    StateT_ to;
+    State (LabelT_);
+    LabelT_ label;
+    std::map<TransT_, StateT> outgoing;
   };
 
-  std::set<StateT_> states;
-  std::map<StateT_, PayloadT_> data;
-  std::vector<Edge> transitions;
+  std::vector<StateData> states;
   StateT start;
 
-  bool isState (StateT_ state) const;
-  // Check to see if a given state identifer is defined.
+protected:
+public:
+  StateMachine ();
 
-  bool addState (StateT_ state);
-  // Attempt to add a new state with the default payload, return success.
+  bool isState (LabelT_ const & label) const;
+  bool isState (StateT  const & state) const;
+  /* Check to see if a given state identifer or label is defined.
+   * Params: label/state, the label or id to check.
+   * Return: If the parameter reperents a state returns true,
+   *   false otherwise.
+   */
 
-  StateT_ getDest (StateT_ from, TransT_ by)
+  StateT lookUp (LabelT_ const & label) const;
+  LabelT_ lookUp (StateT const & state) const;
+  /* Translate the a state into a label or vise-versa.
+   * Params: The label/id of a state.
+   * Return: The id/label of a state.
+   * Except: invalid_argument if label/state is not a valid state.
+   */
+
+  std::pair<bool, StateT> addState (LabelT_ const & label);
+  // Attempt to add a new state with the default payload.
+
+  bool isTrans (StateT from, TransT_ by);
+  // Is a given transition/edge out from a state defined?
+
+  StateT getDest (StateT from, TransT_ by);
   // Get the destination of a movement from a state by a transition.
 };
+
+#include "states.tpp"
 
 #endif//STATES_HPP
