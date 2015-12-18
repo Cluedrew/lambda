@@ -65,6 +65,7 @@ private:
   // stateGraph Calculators.
   void fillState (std::vector<Item> & state);
   LabelT shiftGroup (LabelT const & state, SymbolT sym);
+  std::pair<bool, StateT> destState (StateT state, SymbolT sym);
   void calcStateGraph ();
 
   void calcOperations ();

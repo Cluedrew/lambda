@@ -63,14 +63,28 @@ TEMPLATE_HEAD(pairBoolState)::addState (LabelT_ const & label)
 // Is a given transition/edge out from a state defined?
 TEMPLATE_HEAD(bool)::isTrans (StateT from, TransT_ by)
 {
+  // check state
   return 1 == states[from].outgoing.count(by);
 }
 
 // Get the destination of a movement from a state by a transition.
 TEMPLATE_HEAD(StateT)::getDest (StateT from, TransT_ by)
 {
-  // check
+  // check isTrans
   return states[from].outgoing[by];
+}
+// Set the trans outgoing _from_ labeled _by_ to _to_.
+TEMPLATE_HEAD(void)::setTrans (StateT from, TransT_ by, StateT to)
+{
+  // check state
+  states[from].outgoing[by] = to;
+}
+
+// Remove the trans outgoing _from_ labeled _by_.
+TEMPLATE_HEAD(void)::delTrans (StateT from, TransT_ by)
+{
+  // check state
+  states[from].outgoing.erase(by);
 }
 
 // Get the starting state of the state machine.

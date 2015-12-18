@@ -184,13 +184,46 @@ void Slr1Atg::fillState (LabelT & state)
 }
 
 // Find the subset of a state's items that can be advanced/shifted with sym.
-Slr1Atg::LabelT Slr1Atg::shiftGroup (LabelT const & state, SymbolT sym)
+Slr1Atg::LabelT Slr1Atg::shiftGroup (LabelT const & label, SymbolT sym)
 {
   LabelT fin;
-  for (LabelT::const_iterator it = state.begin() ; it != state.end() ; ++it)
+  for (LabelT::const_iterator it = label.begin() ; it != label.end() ; ++it)
     if (sym == it->rhs[it->place])
       fin.push_back(*it);
   return fin;
+}
+
+/*   From an existing state find the state that would be found at the end of
+ * an edge labeled sym. If no such state exists (aka, it would be empty and
+ * never be reached while parsing) the edge does not exist. If the state does
+ * exist (logically) it will be created if it is not in the graph and an edge
+ * is set to connect them.
+ *   This overwrites an existing edge/transition from state labeled sym.
+ * Params: state: The state to start from.
+ *         sym: The symbol the edge is/would be labeled with.
+ * Return: (false, ?) where ? is a garbage value if the dest-state does not
+ *   exist, if the state does exist returns (true, id) where id is the
+ *   dest-state's id.
+ */
+std::pair<bool, StateT> Slr1Atg::destState (StateT state, SymbolT sym)
+{
+  // Find the kernal of the new state
+  LabelT nLabel = shiftGroup(stateGraph.lookUp(state), sym);
+  // If empty delete any existing edge and stop.
+  if (nLabel.empty())
+  {
+    stateGraph.delTrans(state, sym);
+    return std::make_pair(false, 0);
+  }
+  // Otherwise expand the label.
+  fillState(nLabel);
+  // Get the id of the state with that label, wheither new or old.
+  StateT id = stateGraph.isState(nLabel)
+            ? stateGraph.lookUp(nLabel)
+            : stateGraph.addState(nLabel);
+  // Connect them (check for existing transition?)
+  stateGraph.setTrans(state, sym, id);
+  return std::make_pair(true, id);
 }
 
 // Create a StateGraph that shows possible states of the stack and what
@@ -229,24 +262,23 @@ void Slr1Atg::calcStateGraph ()
 
   // Set up the starting state. (state 0)
   // Use the imaginaryRule as the kurnal, fill out the state.
+  StateT startState;
+  stateGraph.setStart( (startState = stateGraph.addState(fillState(
+      std::vector<Item>(1, imaginaryRule.getFresh())))));
 
   // Set up the end state. (state 1)
   // Regular advancement on S from starting state, add the done operation
   // to the state on eof in look-ahead.
+  destState(startState, grammer.start);
+  data[std::make_pair(endState, getEofSymbol())].push_back(SROp::doneOp());
 
   // ===== Intermediate State Set Up =====
   // Loop to create the remaining states.
   // Process each state by progressing items by one.
   for (StateT proc = 0 ; stateGraph.isState(proc) ; ++proc)
   {
-    // For each symbol, for every item in the state that is advanced
-    // by shifting that symbol, get the next Item and create a new
-    // state kernal from that.
-    // Fill the kernal and check to see if it is equal to any existing
-    // state.
-    // If so add a transition from the currant state to that state.
-    // If not add it to the list of states. ++nextState. This will include
-    // a transition as well.
+    // For each symbol, find the destState.
+    // Would it be faster to go by Rules or Symbols?
   }
 
   /* Each state is the set of Items we could be proccessing.

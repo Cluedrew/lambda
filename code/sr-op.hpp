@@ -47,7 +47,7 @@ struct SROp
   SROp reduceOp (Rule * proRule);
   // Create a new reduce SROp and return it.
 
-  SROp doneOp ()
+  static SROp doneOp ()
   { return SROp{done, 0}; }
   // Get a new done SROp.
 };

@@ -60,6 +60,12 @@ public:
   StateT getDest (StateT from, TransT_ by);
   // Get the destination of a movement from a state by a transition.
 
+  void setTrans (StateT from, TransT_ by, StateT to);
+  // Set the trans outgoing _from_ labeled _by_ to _to_.
+
+  void delTrans (StateT from, TransT_ by);
+  // Remove the trans outgoing _from_ labeled _by_.
+
   StateT getStart (void);
   /* Get the starting state of the state machine.
    * Return: The state id of the starting state. If it has not been set
