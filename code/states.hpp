@@ -28,7 +28,6 @@ private:
     LabelT_ label;
     std::map<TransT_, StateT> outgoing;
   };
-
   std::vector<StateData> states;
   StateT start;
 
@@ -60,6 +59,19 @@ public:
 
   StateT getDest (StateT from, TransT_ by);
   // Get the destination of a movement from a state by a transition.
+
+  StateT getStart (void);
+  /* Get the starting state of the state machine.
+   * Return: The state id of the starting state. If it has not been set
+   *   the default starting state is 0.
+   */
+
+  void setStart (StateT);
+  /* Set the starting state of the state machine.
+   * Params: The state id of the new starting state.
+   * Except: invalid_argument if start is set to a state id that is not a
+   *   state.
+   */
 };
 
 #include "states.tpp"

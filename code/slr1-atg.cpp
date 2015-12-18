@@ -3,6 +3,7 @@
 // Implementation of Slr1Atg
 // The access functions and the massive calculations.
 
+#include <iostream>
 #include "symbol.hpp"
 
 // Constructors and Deconstructor ============================================
@@ -164,7 +165,7 @@ void Slr1Atg::fillState (LabelT & state)
         // Make sure this is not a repeat.
         bool unique = true;
         for (std::vector<Item>::const_iterator jt = state.cbegin() ;
-            jt != state.cend ; ++jt)
+            jt != state.cend() ; ++jt)
           if (freshItem == *jt)
             { unique = false; break; }
         // If this is unique for this state at it to the state.
@@ -183,39 +184,28 @@ void Slr1Atg::calcStateGraph ()
   // Possibly insert some code to drain the graph so this doesn't break
   // everything if it is called twice.
 
-  // Keep a counter, that holds the value of the next state we would make
-  // if we need to make a new on. Update with increment.
-  StateT nextState = 0;
-
   // ===== Beginning and End State Set Up =====
   // The trick is to set up these special cases so they don't conflict
   // with the regular generation.
-  /* Set up the starting state.
+  // Rule imaginaryRule {getEofSymbol(), {grammer.start, getEofSymbol()}}
+
+  /* Set up the starting state. (state 0)
    * In the psuedo-argumented version the starting state's kernal is:
    *   -> * S eof
    * Where S is the starting symbol. Now this rule doesn't exist, but the
    * rest of the system doesn't care.
    */
-  stateGraph.start = nextState;
-  stateGraph.addState(nextState);
-  //add all rules with starting symbol on the lhs to the graph.
-  ++nextState;
 
-  /* Set up the end state.
+  /* Set up the end state. (state 1)
    * Psuedo-argumented end state is: -> S * eof
    * It is never reduced and the eof is never shifted, the only operation
    * used here is done.
    */
-  stateGraph.addState(nextState);
-  data.insert(std::pair<std::pair<StateT, SymbolT> std::vector<SROp> >
-              (std::pair<StateT, SymbolT>(nextState, getEofSymbol()),
-               SROp::doneOp()));
-  ++nextState;
 
   // ===== Intermediate State Set Up =====
   // Loop to create the remaining states.
   // Process each state by progressing items by one.
-  for (StateT proc = 0 ; proc < nextState ; ++proc)
+  for (StateT proc = 0 ; stateGraph.isState(proc) ; ++proc)
   {
     // For each symbol, for every item in the state that is advanced
     // by shifting that symbol, get the next Item and create a new
@@ -257,10 +247,11 @@ void calcOperations ()
  */
 void Slr1Atg::preformAllCalc ()
 {
+  bool change;
 #define REPEAT_OVER_RULES(calcFunc) \
   do { \
-    bool change = false; \
-    for (std::set<Rule>::iterator it = grammer.rules.begin() ; \
+    change = false; \
+    for (std::vector<Rule>::const_iterator it = grammer.rules.begin() ; \
          it != grammer.rules.end() ; ++it) \
       change = calcFunc(*it) || change; \
   } while (change);
@@ -275,15 +266,15 @@ void Slr1Atg::preformAllCalc ()
 // Implementation Functions ==================================================
 // Check to see if a SymbolT can expand to nothing (an empty series).
 bool Slr1Atg::isNullable (SymbolT sym) const
-{ return symbols[sym].nullable; }
+{ return symbols.find(sym)->second.nullable; }
 
 // Get the set of symbols that can be first in an expantion of a SymbolT.
 std::set<SymbolT> Slr1Atg::firstSet (SymbolT sym) const
-{ return symbols[sym].first; }
+{ return symbols.find(sym)->second.first; }
 
 // Get the set of symbols that can be follow the expanition of a SymbolT.
 std::set<SymbolT> Slr1Atg::followSet (SymbolT sym) const
-{ return symbols[sym].follow; }
+{ return symbols.find(sym)->second.follow; }
 
 // Create and return a new ActionTable from this generator.
 ActionTable Slr1Atg::generate () const
@@ -297,22 +288,16 @@ ActionTable Slr1Atg::generate () const
   }
 
   // Iterator declarations:
-  std::map<StateT, std::map<SymbolT, std::vector<SROp> > >::iterator stateIT;
-  std::map<SymbolT, std::vector<SROp> >::iterator symbolIT;
+  std::map<std::pair<StateT, SymbolT, std::vector<SROp> >::const_iterator it;
 
   // Now the actual generation.
   ActionTable actTab;
 
-  // For every state in data:
-  for (stateIT = data.begin() ; stateIT != data.end() ; ++stateIT)
-    // For every transition out of every state
-      for (symbolIT = stateIT->second.begin() ;
-           symbolIT != stateIT->second.end() ; ++symbolIT)
-        // Is there is exactly 1 possible destination
-        // (There should never be more than 1.)
-        if (1 == symbolIT->second.size())
-          // Copy it into the ActionTable.
-          actTab.setOp(*stateIT, *symbolIT, symbolIT->second[0])
+  // For every state symbol combination:
+  for (it = data.begin() ; it != data.end() ; ++it)
+    // If an operation is defined save it (2 or more has been checked for)
+    if (1 == it->second.size())
+      actTab.setOp(it->first.first, it->first.second, it->second[0]);
   return actTab;
 }
 
@@ -320,19 +305,14 @@ ActionTable Slr1Atg::generate () const
 bool Slr1Atg::canGenerate () const
 {
   // Iterator declarations:
-  std::map<StateT, std::map<SymbolT, std::vector<SROp> > >::iterator stateIT;
-  std::map<SymbolT, std::vector<SROp> >::iterator symbolIT;
+  std::map<std::pair<StateT, SymbolT, std::vector<SROp> >::const_iterator it;
 
-  // For every state in data:
-  for (stateIT = data.begin() ; stateIT != data.end() ; ++stateIT)
-    // For every transition out of every state
-      for (symbolIT = stateIT->second.begin() ;
-           symbolIT != stateIT->second.end() ; ++symbolIT)
-        // Is there than 1 possible destination?
-        if (1 < symbolIT->second.size())
-          // If so we can't generate an ActionTable.
-          return false;
-  // If everything matches, we can produce a generator.
+  // For every state symbol combination:
+  for (it = data.begin() ; it != data.end() ; ++it)
+    // Make sure there aren't multiple operations defined.
+    if (1 < it->second.size())
+      return false;
+  // If there are no conficts, an action table can be generated.
   return true;
 }
 
@@ -340,22 +320,18 @@ bool Slr1Atg::canGenerate () const
 void Slr1Atg::printProblems (std::ostream & out) const
 {
   // Iterator declarations:
-  std::map<StateT, std::map<SymbolT, std::vector<SROp> > >::iterator stateIT;
-  std::map<SymbolT, std::vector<SROp> >::iterator symbolIT;
+  std::map<std::pair<StateT, SymbolT, std::vector<SROp> >::const_iterator it;
 
-  // For every state in data:
-  for (stateIT = data.begin() ; stateIT != data.end() ; ++stateIT)
-    // For every transition out of every state
-      for (symbolIT = stateIT->second.begin() ;
-           symbolIT != stateIT->second.end() ; ++symbolIT)
-        // Is more than 1 possible destination?
-        if (1 < symbolIT->second.size())
-        {
-          // Print conflict:
-          out << '(' << *stateIT << ", " << *symbolIT << ')' <<
-              " has " << symbolIT->second.size() << " possible outcomes."
-              << std::endl;
-        }
+  // For every state symbol combination:
+  for (it = data.begin() ; it != data.end() ; ++it)
+    // Make sure there aren't multiple operations defined.
+    if (1 < it->second.size())
+    {
+      // Print conflict:
+      out << '(' << *stateIT << ", " << *symbolIT << ')' <<
+          " has " << symbolIT->second.size() << " possible outcomes."
+          << std::endl;
+    }
 }
 
 // LabelTEquals Definition ===================================================

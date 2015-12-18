@@ -86,6 +86,17 @@ TEMPLATE_HEAD(StateT)::getDest (StateT from, TransT_ by)
   return states[from].outgoing[by];
 }
 
+// Get the starting state of the state machine.
+TEMPLATE_HEAD(StateT)::getStart (void)
+{ return start; }
+
+// Set the starting state of the state machine.
+TEMPLATE_HEAD(void)::setStart (StateT state)
+{
+  // check
+  start = state;
+}
+
 // Clean up local macros.
 #undef TEMPLATE_HEAD
 
