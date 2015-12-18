@@ -89,3 +89,32 @@ std::istream & operator>> (std::istream & in, SymbolEnum & sym)
 
   return in;
 }
+
+// Pre/Post-increment operators ----------------------------------------------
+SymbolEnum & operator++ (SymbolEnum & sym)
+{
+#define SYM_FROM_TO(f,t) case SymbolEnum::f: return sym = SymbolEnum::t;
+  switch (sym)
+  {
+  SYM_FROM_TO(variable,dot)
+  SYM_FROM_TO(dot,openApp)
+  SYM_FROM_TO(openApp,closeApp)
+  SYM_FROM_TO(closeApp,eof)
+  SYM_FROM_TO(eof,INPUT)
+  SYM_FROM_TO(INPUT,PROGRAM)
+  SYM_FROM_TO(PROGRAM,ELEMENT)
+  SYM_FROM_TO(ELEMENT,FUNCTION)
+  SYM_FROM_TO(FUNCTION,APPLICATION)
+  SYM_FROM_TO(APPLICATION,cap)
+  default:
+    return sym = SymbolEnum::cap;
+  }
+#undef SYM_FROM_TO
+}
+
+SymbolEnum operator++ (SymbolEnum & sym, int)
+{
+  SymbolEnum tmp = sym;
+  operator++(sym);
+  return tmp;
+}

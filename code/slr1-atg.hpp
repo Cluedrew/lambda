@@ -35,11 +35,15 @@
 class Slr1Atg : public ActionTableGenerator
 {
 private:
-  CFGrammer const grammer;
-  std::map<std::pair<StateT,SymbolT>, std::vector<SROp> > data;
-//std::map<StateT, std::map<SymbolT,std::vector<SROp> > > data;
-  StateMachine<StateT, SymbolT, std::vector<Item> > stateGraph;
-
+  // LabelT_ type for the StateMachine.
+  typedef std::vector<Item> LabelT;
+  // Comparitor for LabelT.
+  class LabelTEquals
+  {
+  public:
+    bool operator() (LabelT const &, LabelT const &);
+  };
+  // Data for each symbol in the cfl.
   struct SymbolData
   {
     SymbolData(SymbolT);
@@ -47,7 +51,11 @@ private:
     std::set<SymbolT> first;
     std::set<SymbolT> follow;
   };
+
+  CFGrammer const grammer;
+  std::map<std::pair<StateT,SymbolT>, std::vector<SROp> > data;
   std::map<SymbolT, SymbolData> symbols;
+  StateMachine<LabelT, SymbolT> stateGraph;
 
   // SymbolData Calculators.
   bool calcNullable (Rule);

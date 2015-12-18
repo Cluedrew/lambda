@@ -46,4 +46,8 @@ std::ostream & operator<< (std::ostream & out, SymbolEnum sym);
 // Standard read operator overload.
 std::istream & operator>> (std::istream & in, SymbolEnum & sym);
 
+// Pre/Post-increment operators
+SymbolEnum & operator++ (SymbolEnum & sym);
+SymbolEnum operator++ (SymbolEnum & sym, int);
+
 #endif//SYMBOL_HPP

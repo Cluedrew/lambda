@@ -18,13 +18,13 @@
 #include "parse-fwd.hpp" // Defines StateT
 
 template<typename LabelT_, typename TransT_,
-         typename LabelEquals = equal_to<LabelT_> >
+         typename LabelEquals = std::equal_to<LabelT_> >
 class StateMachine
 {
 private:
   struct StateData
   {
-    State (LabelT_);
+    StateData (LabelT_);
     LabelT_ label;
     std::map<TransT_, StateT> outgoing;
   };
@@ -34,7 +34,7 @@ private:
 
 protected:
 public:
-  StateMachine ();
+  //StateMachine ();
 
   bool isState (LabelT_ const & label) const;
   bool isState (StateT  const & state) const;

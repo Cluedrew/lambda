@@ -3,16 +3,16 @@
 // Implementation of Slr1Atg
 // The access functions and the massive calculations.
 
-#include "states.hpp"
+#include "symbol.hpp"
 
 // Constructors and Deconstructor ============================================
 // Create a basic Slr1Atg for the given CFG.
 Slr1Atg::Slr1Atg (CFGrammer cfg) :
-  data(), grammer(cfg), symbols()
+  grammer(cfg), data(), symbols(), stateGraph()
 {
   // Initialize the symbols map.
-  for (SymbolT isym = SymbolEnum::variable ; isym < cap ; ++isym)
-    symbols.insert(std::make_pair(isym, SymbolData(isym));
+  for (SymbolT isym = SymbolEnum::variable ; isym < SymbolEnum::cap ; ++isym)
+    symbols.insert(std::make_pair(isym, SymbolData(isym)));
   // Includes added the eof to the start symbol's follow set.
   symbols[grammer.start].follow.insert(getEofSymbol());
 
@@ -69,7 +69,7 @@ bool Slr1Atg::calcNullable (Rule rule)
   // if none is found than the rule is nullable (or null).
   bool mightNull = true;
   for (unsigned int i = 0 ; i < rule.cr() ; ++i)
-    if (!isNullable(rule.rhs[i])
+    if (!isNullable(rule.rhs[i]))
       { mightNull = false; break; }
 
   // If the rule was found to be nullable, the symbol is too.
@@ -94,7 +94,7 @@ bool Slr1Atg::calcFirst (Rule rule)
     // Get the symbols first set
     std::set<SymbolT> & innerSet = symbols[rule.rhs[i]].first;
     // For each element in the symbols first set...
-    for (std::set<SymbolT>::const_iterator it = innerSet.cbegin()) ;
+    for (std::set<SymbolT>::const_iterator it = innerSet.cbegin() ;
          it != innerSet.cend() ; ++it)
       // ... try adding it to the this first set and check the result.
       hasChanged = firstSet.insert(*it).second || hasChanged;
@@ -143,7 +143,7 @@ bool Slr1Atg::calcFollow (Rule rule)
 
 // ===========================================================================
 // Fill a state from its kurnal to a complete state.
-void fillState (std::vector<Item> & state)
+void Slr1Atg::fillState (LabelT & state)
 {
   // For each Item in the state ...
   for (unsigned int i = 0 ; i < state.size() ; ++i)
@@ -176,7 +176,7 @@ void fillState (std::vector<Item> & state)
 
 // Create a StateGraph that shows possible states of the stack and what
 // parse rules can be ongoing at that time.
-void calcStateGraph ()
+void Slr1Atg::calcStateGraph ()
 {
   // Fill in the stateGraph.
 
@@ -356,4 +356,18 @@ void Slr1Atg::printProblems (std::ostream & out) const
               " has " << symbolIT->second.size() << " possible outcomes."
               << std::endl;
         }
+}
+
+// LabelTEquals Definition ===================================================
+bool Srl1Atg::LabelTEquals::operator() (LabelT const & lhs,LabelT const & rhs)
+{
+  // The labels must have the same set of items.
+  if (lhs.size() == rhs.size)
+  {
+    // ! Make sure to change !
+    return true;
+  }
+  // If there are different numbers of Items the labels are not equal.
+  else
+    return false;
 }
