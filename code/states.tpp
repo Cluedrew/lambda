@@ -11,9 +11,6 @@ typedef std::pair<bool, StateT> pairBoolState;
 
 // State Helper Structure Implementation =====================================
 // Create a new state.
-//template<typename StateT_, typename TransT_, typename PayLoadT_>
-//template<typename LabelT_, typename TransT_, typename LabelEquals>
-//StateMachine<LabelT_, TransT_, LabelEquals>::State::State (LabelT_ label)
 TEMPLATE_HEAD()::StateData::StateData (LabelT_ label) :
     label(label), outgoing()
 {}
@@ -21,8 +18,6 @@ TEMPLATE_HEAD()::StateData::StateData (LabelT_ label) :
 // StateMachine Functions ====================================================
 
 // Check to see if a given state identifer or label is defined.
-//template<typename LabelT_, typename TransT_, typename LabelEquals>
-//bool StateMachine<LabelT_, TransT_, LabelEquals>::
 TEMPLATE_HEAD(bool)::isState (LabelT_ const & label) const
 {
   // The labels have to all be checked with LabelEquals.
@@ -31,8 +26,6 @@ TEMPLATE_HEAD(bool)::isState (LabelT_ const & label) const
       return true;
   return false;
 }
-//template<typename LabelT_, typename TransT_, typename LabelEquals>
-//bool StateMachine<LabelT_, TransT_, LabelEquals>::
 TEMPLATE_HEAD(bool)::isState (StateT const & state) const
 {
   // The state ids are continuous, they just have to be in range.
@@ -40,26 +33,20 @@ TEMPLATE_HEAD(bool)::isState (StateT const & state) const
 }
 
 // Translate the a state into a label or vise-versa.
-//template<typename LabelT_, typename TransT_, typename LabelEquals>
-//StateT StateMachine<LabelT_, TransT_, LabelEquals>::
-TEMPLATE_HEAD(StateT)::lookUp (LabelT_ const & label) const
+TEMPLATE_HEAD(StateT const &)::lookUp (LabelT_ const & label) const
 {
   for (StateT i = 0 ; i < states.size() ; ++i)
     if (LabelEquals(label, states[i].label))
       return i;
   // error on fall through.
 }
-//template<typename LabelT_, typename TransT_, typename LabelEquals>
-//LabelT_ StateMachine<LabelT_, TransT_, LabelEquals>::
-TEMPLATE_HEAD(LabelT_)::lookUp (StateT const & state) const
+TEMPLATE_HEAD(LabelT_ const &)::lookUp (StateT const & state) const
 {
   // check
   return states[state].label;
 }
 
 // Attempt to add a new state with the default payload, return success.
-//template<typename LabelT_, typename TransT_, typename LabelEquals>
-//bool StateMachine<LabelT_, TransT_, LabelEquals>::
 TEMPLATE_HEAD(pairBoolState)::addState (LabelT_ const & label)
 {
   // If the state label is already defined, return the approprate id.

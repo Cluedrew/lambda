@@ -38,14 +38,14 @@ private:
   // LabelT_ type for the StateMachine.
   typedef std::vector<Item> LabelT;
   // Comparitor for LabelT.
-  class LabelTEquals
+  struct LabelTEquals
   {
-  public:
     bool operator() (LabelT const &, LabelT const &);
   };
   // Data for each symbol in the cfl.
   struct SymbolData
   {
+    SymbolData();
     SymbolData(SymbolT);
     bool nullable;
     std::set<SymbolT> first;
@@ -64,6 +64,7 @@ private:
 
   // stateGraph Calculators.
   void fillState (std::vector<Item> & state);
+  LabelT shiftGroup (LabelT const & state, SymbolT sym);
   void calcStateGraph ();
 
   void calcOperations ();

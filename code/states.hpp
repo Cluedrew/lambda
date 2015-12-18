@@ -43,8 +43,8 @@ public:
    *   false otherwise.
    */
 
-  StateT lookUp (LabelT_ const & label) const;
-  LabelT_ lookUp (StateT const & state) const;
+  StateT const & lookUp (LabelT_ const & label) const;
+  LabelT_ const & lookUp (StateT const & state) const;
   /* Translate the a state into a label or vise-versa.
    * Params: The label/id of a state.
    * Return: The id/label of a state.

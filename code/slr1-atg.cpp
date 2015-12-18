@@ -14,7 +14,9 @@ Slr1Atg::Slr1Atg (CFGrammer cfg) :
   // Initialize the symbols map.
   for (SymbolT isym = SymbolEnum::variable ; isym < SymbolEnum::cap ; ++isym)
     symbols.insert(std::make_pair(isym, SymbolData(isym)));
+
   // Includes added the eof to the start symbol's follow set.
+  // This is because of the imaginary rule: -> S eof.
   symbols[grammer.start].follow.insert(getEofSymbol());
 
   // Calculate the fill in all the SymbolData for all symbols.
@@ -47,15 +49,21 @@ Slr1Atg::~Slr1Atg ()
 
 // ===========================================================================
 // Helper Structure SymbolData Constructor -----------------------------------
+// Fills in the default vaules for a generic symbol.
+Slr1Atg::SymbolData::SymbolData () :
+  nullable(false), first(), follow()
+{}
+
 // Fills in the default values for a given symbol.
 Slr1Atg::SymbolData::SymbolData (SymbolT sym) :
   nullable(false), first(), follow()
 {
-  // Terminals are there own first set.
+  // Terminals are their own first set.
   if (isTerminal(sym))
     first.insert(sym);
 }
 
+// ===========================================================================
 // The Three SymbolData Calculator Functions ---------------------------------
 // Rule -> Boolean * rule to proccess -> did that change anything
 // Also they have to be run in order.
@@ -175,6 +183,16 @@ void Slr1Atg::fillState (LabelT & state)
   }
 }
 
+// Find the subset of a state's items that can be advanced/shifted with sym.
+Slr1Atg::LabelT Slr1Atg::shiftGroup (LabelT const & state, SymbolT sym)
+{
+  LabelT fin;
+  for (LabelT::const_iterator it = state.begin() ; it != state.end() ; ++it)
+    if (sym == it->rhs[it->place])
+      fin.push_back(*it);
+  return fin;
+}
+
 // Create a StateGraph that shows possible states of the stack and what
 // parse rules can be ongoing at that time.
 void Slr1Atg::calcStateGraph ()
@@ -184,23 +202,37 @@ void Slr1Atg::calcStateGraph ()
   // Possibly insert some code to drain the graph so this doesn't break
   // everything if it is called twice.
 
+  /* ===== Create the Imaginary Production Rule =====
+   *   -> S eof : The imaginary rule; not part of the grammer (although eof is
+   * added to S's (the start symbol's) follow set as if it was. It gets rid
+   * of special cases at the end of the stream and the top of the parse tree.
+   *   Its fresh item -> * S eof is the kernal of the starting state and the
+   * second item -> S * eof appears in the end state. Because eof is never
+   * shifted the third item never appears.
+   *   Implementation detail: eof is used as the lhs, but the rule is never
+   * used in symbol property calculations, so eof isn't going to end up with a
+   * first set.
+   */
+  Rule imaginaryRule;
+  {
+    std::vector<SymbolT> tmp_rhs;
+    tmp_rhs.push_back(grammer.start);
+    tmp_rhs.push_back(getEofSymbol());
+    imaginaryRule.rhs = tmp_rhs;
+    imaginaryRule.lhs = getEofSymbol();
+  }
+
   // ===== Beginning and End State Set Up =====
   // The trick is to set up these special cases so they don't conflict
   // with the regular generation.
   // Rule imaginaryRule {getEofSymbol(), {grammer.start, getEofSymbol()}}
 
-  /* Set up the starting state. (state 0)
-   * In the psuedo-argumented version the starting state's kernal is:
-   *   -> * S eof
-   * Where S is the starting symbol. Now this rule doesn't exist, but the
-   * rest of the system doesn't care.
-   */
+  // Set up the starting state. (state 0)
+  // Use the imaginaryRule as the kurnal, fill out the state.
 
-  /* Set up the end state. (state 1)
-   * Psuedo-argumented end state is: -> S * eof
-   * It is never reduced and the eof is never shifted, the only operation
-   * used here is done.
-   */
+  // Set up the end state. (state 1)
+  // Regular advancement on S from starting state, add the done operation
+  // to the state on eof in look-ahead.
 
   // ===== Intermediate State Set Up =====
   // Loop to create the remaining states.
@@ -288,7 +320,7 @@ ActionTable Slr1Atg::generate () const
   }
 
   // Iterator declarations:
-  std::map<std::pair<StateT, SymbolT, std::vector<SROp> >::const_iterator it;
+  std::map<std::pair<StateT, SymbolT>, std::vector<SROp> >::const_iterator it;
 
   // Now the actual generation.
   ActionTable actTab;
@@ -305,7 +337,7 @@ ActionTable Slr1Atg::generate () const
 bool Slr1Atg::canGenerate () const
 {
   // Iterator declarations:
-  std::map<std::pair<StateT, SymbolT, std::vector<SROp> >::const_iterator it;
+  std::map<std::pair<StateT, SymbolT>, std::vector<SROp> >::const_iterator it;
 
   // For every state symbol combination:
   for (it = data.begin() ; it != data.end() ; ++it)
@@ -320,7 +352,7 @@ bool Slr1Atg::canGenerate () const
 void Slr1Atg::printProblems (std::ostream & out) const
 {
   // Iterator declarations:
-  std::map<std::pair<StateT, SymbolT, std::vector<SROp> >::const_iterator it;
+  std::map<std::pair<StateT, SymbolT>, std::vector<SROp> >::const_iterator it;
 
   // For every state symbol combination:
   for (it = data.begin() ; it != data.end() ; ++it)
@@ -328,17 +360,16 @@ void Slr1Atg::printProblems (std::ostream & out) const
     if (1 < it->second.size())
     {
       // Print conflict:
-      out << '(' << *stateIT << ", " << *symbolIT << ')' <<
-          " has " << symbolIT->second.size() << " possible outcomes."
-          << std::endl;
+      out << '(' << it->first.first << ", " << it->first.second << ") has " <<
+          it->second.size() << " possible outcomes." << std::endl;
     }
 }
 
 // LabelTEquals Definition ===================================================
-bool Srl1Atg::LabelTEquals::operator() (LabelT const & lhs,LabelT const & rhs)
+bool Slr1Atg::LabelTEquals::operator() (LabelT const & lhs,LabelT const & rhs)
 {
   // The labels must have the same set of items.
-  if (lhs.size() == rhs.size)
+  if (lhs.size() == rhs.size())
   {
     // ! Make sure to change !
     return true;
