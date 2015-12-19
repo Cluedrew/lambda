@@ -40,7 +40,8 @@ private:
   // Comparitor for LabelT.
   struct LabelTEquals
   {
-    bool operator() (LabelT const &, LabelT const &);
+    LabelTEquals() {}
+    bool operator() (LabelT const &, LabelT const &) const;
   };
   // Data for each symbol in the cfl.
   struct SymbolData
@@ -55,7 +56,7 @@ private:
   CFGrammer const grammer;
   std::map<std::pair<StateT,SymbolT>, std::vector<SROp> > data;
   std::map<SymbolT, SymbolData> symbols;
-  StateMachine<LabelT, SymbolT> stateGraph;
+  StateMachine<LabelT, SymbolT, LabelTEquals> stateGraph;
 
   // SymbolData Calculators.
   bool calcNullable (Rule);

@@ -66,6 +66,29 @@ bool Item::operator== (Item const & other) const
   return false;
 }
 
+// Inequality Comparison: Any field must miss-match.
+bool Rule::operator!= (Rule const & other) const
+{
+  if (lhs == other.lhs && cr() == other.cr())
+  {
+    for (unsigned int i = 0 ; i < cr() ; ++i)
+      if (rhs[i] != other.rhs[i])
+        return true;
+    return false;
+  }
+  return true;
+}
+bool Item::operator!= (Item const & other) const
+{
+  if (lhs == other.lhs && cr() == other.cr() && place == other.place)
+  {
+    for (unsigned int i = 0 ; i < cr() ; ++i)
+      if (rhs[i] != other.rhs[i])
+        return true;
+    return false;
+  }
+  return true;
+}
 
 // Print the Rule to the given stream.
 std::ostream & operator<< (std::ostream & out, Rule const & rule)

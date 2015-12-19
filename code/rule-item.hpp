@@ -17,6 +17,7 @@ struct Rule
   unsigned int cr () const; // count right, rhs.size()
   bool operator< (Rule const &) const;
   bool operator== (Rule const &) const;
+  bool operator!= (Rule const &) const;
 
   // Return a fresh item from this production Rule.
   Item getFresh ();
@@ -31,6 +32,7 @@ struct Item // : public Rule
   unsigned int cr () const; // count right, rhs.size()
   bool operator< (Item const &) const;
   bool operator== (Item const &) const;
+  bool operator!= (Item const &) const;
 
   // Return the base production Rule of the item.
   Rule getBase ();

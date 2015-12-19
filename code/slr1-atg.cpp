@@ -218,9 +218,7 @@ std::pair<bool, StateT> Slr1Atg::destState (StateT state, SymbolT sym)
   // Otherwise expand the label.
   fillState(nLabel);
   // Get the id of the state with that label, wheither new or old.
-  StateT id = stateGraph.isState(nLabel)
-            ? stateGraph.lookUp(nLabel)
-            : stateGraph.addState(nLabel);
+  StateT id = stateGraph.addState(nLabel).second;
   // Connect them (check for existing transition?)
   stateGraph.setTrans(state, sym, id);
   return std::make_pair(true, id);
@@ -254,6 +252,7 @@ void Slr1Atg::calcStateGraph ()
     imaginaryRule.rhs = tmp_rhs;
     imaginaryRule.lhs = getEofSymbol();
   }
+  Item imaginaryItem1 = imaginaryRule.getFresh();
 
   // ===== Beginning and End State Set Up =====
   // The trick is to set up these special cases so they don't conflict
@@ -263,13 +262,17 @@ void Slr1Atg::calcStateGraph ()
   // Set up the starting state. (state 0)
   // Use the imaginaryRule as the kurnal, fill out the state.
   StateT startState;
-  stateGraph.setStart( (startState = stateGraph.addState(fillState(
-      std::vector<Item>(1, imaginaryRule.getFresh())))));
+  {
+    LabelT startLabel = std::vector<Item>(1, imaginaryRule.getFresh());
+    fillState(startLabel);
+    stateGraph.setStart(
+        (startState = stateGraph.addState(startLabel).second) );
+  }
 
   // Set up the end state. (state 1)
   // Regular advancement on S from starting state, add the done operation
-  // to the state on eof in look-ahead.
-  destState(startState, grammer.start);
+  // to the state on eof in look-ahead. (I am confident this will not fail.)
+  StateT endState = destState(startState, grammer.start).second;
   data[std::make_pair(endState, getEofSymbol())].push_back(SROp::doneOp());
 
   // ===== Intermediate State Set Up =====
@@ -398,12 +401,17 @@ void Slr1Atg::printProblems (std::ostream & out) const
 }
 
 // LabelTEquals Definition ===================================================
-bool Slr1Atg::LabelTEquals::operator() (LabelT const & lhs,LabelT const & rhs)
+bool Slr1Atg::LabelTEquals::operator() (LabelT const & lhs,
+                                        LabelT const & rhs) const
 {
   // The labels must have the same set of items.
   if (lhs.size() == rhs.size())
   {
-    // ! Make sure to change !
+    LabelT::const_iterator lit = lhs.cbegin();
+    LabelT::const_iterator rit = rhs.cbegin();
+    for (; lit != lhs.cend() ; ++lit, ++rit)
+      if (*lit != *rit)
+        return false;
     return true;
   }
   // If there are different numbers of Items the labels are not equal.

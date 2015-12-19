@@ -22,6 +22,7 @@ template<typename LabelT_, typename TransT_,
 class StateMachine
 {
 private:
+  LabelEquals cmp;
   struct StateData
   {
     StateData (LabelT_);
@@ -43,8 +44,8 @@ public:
    *   false otherwise.
    */
 
-  StateT const & lookUp (LabelT_ const & label) const;
-  LabelT_ const & lookUp (StateT const & state) const;
+  StateT lookUp (LabelT_ const & label) const;
+  LabelT_ const & lookUp (StateT state) const;
   /* Translate the a state into a label or vise-versa.
    * Params: The label/id of a state.
    * Return: The id/label of a state.

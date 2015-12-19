@@ -1,6 +1,8 @@
 #ifndef STATES_EPP
 #define STATES_EPP
 
+#include <stdexcept>
+
 //Trying to cut down on the much to big template headers.
 #define TEMPLATE_HEAD(return_t) \
 template<typename LabelT_, typename TransT_, typename LabelEquals> \
@@ -22,7 +24,7 @@ TEMPLATE_HEAD(bool)::isState (LabelT_ const & label) const
 {
   // The labels have to all be checked with LabelEquals.
   for (unsigned int i = 0 ; i < states.size() ; ++i)
-    if (LabelEquals(label, states[i].label))
+    if (cmp(label, states[i].label))
       return true;
   return false;
 }
@@ -33,16 +35,20 @@ TEMPLATE_HEAD(bool)::isState (StateT const & state) const
 }
 
 // Translate the a state into a label or vise-versa.
-TEMPLATE_HEAD(StateT const &)::lookUp (LabelT_ const & label) const
+TEMPLATE_HEAD(StateT)::lookUp (LabelT_ const & label) const
 {
   for (StateT i = 0 ; i < states.size() ; ++i)
-    if (LabelEquals(label, states[i].label))
+    if (cmp(label, states[i].label))
       return i;
-  // error on fall through.
+  // Error on fall through.
+  throw std::invalid_argument("StateMachine: lookUp: invalid label value.");
 }
-TEMPLATE_HEAD(LabelT_ const &)::lookUp (StateT const & state) const
+TEMPLATE_HEAD(LabelT_ const &)::lookUp (StateT state) const
 {
-  // check
+  // Check that state is a State.
+  if (!isState(state))
+    throw std::invalid_argument("StateMachine: lookUp: invalid state value.");
+
   return states[state].label;
 }
 
@@ -63,27 +69,39 @@ TEMPLATE_HEAD(pairBoolState)::addState (LabelT_ const & label)
 // Is a given transition/edge out from a state defined?
 TEMPLATE_HEAD(bool)::isTrans (StateT from, TransT_ by)
 {
-  // check state
+  if(!isState(from))
+    throw std::invalid_argument("StateMachine: isTrans: invalid from value.");
+
   return 1 == states[from].outgoing.count(by);
 }
 
 // Get the destination of a movement from a state by a transition.
 TEMPLATE_HEAD(StateT)::getDest (StateT from, TransT_ by)
 {
-  // check isTrans
+  if (!isState(from))
+    throw std::invalid_argument("StateMachine: getDest: invalid from value.");
+  else if (!isTrans(from, by))
+    throw std::invalid_argument("StateMachine: getDest: invalid by value.");
+
   return states[from].outgoing[by];
 }
 // Set the trans outgoing _from_ labeled _by_ to _to_.
 TEMPLATE_HEAD(void)::setTrans (StateT from, TransT_ by, StateT to)
 {
-  // check state
+  if (!isState(from))
+    throw std::invalid_argument("StateMachine: setTrans: invalid from value.");
+  else if (!isState(to))
+    throw std::invalid_argument("StateMachine: setTrans: invalid to value.");
+
   states[from].outgoing[by] = to;
 }
 
 // Remove the trans outgoing _from_ labeled _by_.
 TEMPLATE_HEAD(void)::delTrans (StateT from, TransT_ by)
 {
-  // check state
+  if (!isState(from))
+    throw std::invalid_argument("StateMachine: delTrans: invalid from value.");
+
   states[from].outgoing.erase(by);
 }
 
@@ -94,7 +112,9 @@ TEMPLATE_HEAD(StateT)::getStart (void)
 // Set the starting state of the state machine.
 TEMPLATE_HEAD(void)::setStart (StateT state)
 {
-  // check
+  if (!isState(state))
+    throw std::invalid_argument("StateMachine: setStart: invalid state value.");
+
   start = state;
 }
 
