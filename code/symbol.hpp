@@ -4,6 +4,7 @@
 // The declaration of the symbol enumeration, used as SymbolT.
 
 #include <iosfwd>
+#include <string>
 
 enum class SymbolEnum : unsigned char
 {
@@ -39,6 +40,12 @@ bool isSymbol (SymbolEnum sym);
 
 // Get the eof symbol.
 SymbolEnum getEofSymbol ();
+
+// Convert a symbol into a string.
+std::string symbolToString (SymbolEnum symbol);
+
+// Convert a string into a symbol.
+SymbolEnum stringToSymbol (std::string string);
 
 // Standard print operator overload.
 std::ostream & operator<< (std::ostream & out, SymbolEnum sym);
