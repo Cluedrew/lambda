@@ -3,7 +3,10 @@
 // Implementation of the ActionTable and ActionTableGenerator.
 
 #include <stdexcept>
+#include <ios>
 #include <iostream>
+#include <string>
+#include <sstream>
 #include "symbol.hpp"
 
 // ===========================================================================
@@ -74,4 +77,48 @@ void ActionTable::delOp (StateT state, SymbolT symbol)
   std::pair<StateT, SymbolT> index(state, symbol);
   // If an op is defined there, remove it.
   if (data.count(index)) data.erase(index);
+}
+
+// Input and Output Operator Overloads =======================================
+// Print an ActionTable to a stream.
+std::ostream & operator<< (std::ostream & out, ActionTable const & at)
+{
+  // Size line.
+  out << at.data.size();
+  // The n operation lines.
+  for (std::map<std::pair<StateT, SymbolT>, SROp>::const_iterator
+       it = at.data.cbegin() ; it != at.data.cend() ; ++it)
+    out << '\n' << it->first.first << ' ' << it->first.second << ' '
+        << it->second;
+  return out << std::endl;
+}
+
+// Read an ActionTable from a stream.
+std::istream & operator>> (std::istream & in, ActionTable & at)
+{
+  // Local Storage variables.
+  StateT state;
+  SymbolT symbol;
+  SROp op;
+  std::string line;
+  std::istringstream iss;
+  int n;
+
+  // Get the size.
+  getline(in, line);
+  iss.str(line);
+  iss >> n;
+
+  // Get all the operations.
+  for (int i = 0 ; i < n && in.good() ; ++i)
+  {
+    getline(in, line);
+    iss.str(line);
+    iss >> state >> symbol >> op;
+    if (in.bad())
+      break;
+    else
+      at.data.insert(std::make_pair(std::make_pair(state, symbol), op));
+  }
+  return in;
 }

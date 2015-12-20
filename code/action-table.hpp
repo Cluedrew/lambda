@@ -10,6 +10,7 @@
  */
 
 #include <map>
+#include <iosfwd>
 #include "parse-fwd.hpp"
 #include "sr-op.hpp"
 class ActionTableGenerator;
@@ -18,7 +19,6 @@ class ActionTableGenerator;
 class ActionTable
 {
 private:
-  //std::map<StateT, std::map<SymbolT,SROp> > data;
   std::map<std::pair<StateT, SymbolT>, SROp> data;
 
 protected:
@@ -69,7 +69,33 @@ public:
    * Params: The StateT and SymbolT for an SROp.
    * Effect: Removes the given SROp from the ActionTable if it is defined.
    */
+
+  friend std::ostream & operator<< (std::ostream &, ActionTable const &);
+  friend std::istream & operator>> (std::istream &, ActionTable &);
 };
+
+std::ostream & operator<< (std::ostream &, ActionTable const &);
+/* Print an ActionTable to a stream.
+ * Params: The output stream to print to and the ActionTable to print.
+ * Effect: The ActionTable is printed to the ostream.
+ * Return: A reference to the provided ostream.
+ * Format: N(
+ *   STATE SYMBOL OPERATION){N}\n
+ * The number of operations in the table followed by all the operations,
+ * with a trailing new line.
+ */
+std::istream & operator>> (std::istream &, ActionTable &);
+/* Read an ActionTable from a stream.
+ * Params: The input stream to read from and a reference to the ActionTable
+ *   variable to store the data in.
+ * Effect: The ActionTable is changed to store the value read from the ostream
+ *   and the stream's badbit is set if there is an error.
+ * Return: A reference to the provided istream.
+ * Format: N(
+ *   STATE SYMBOL OPERATION){N}\n
+ * The number of operations in the table followed by all the operations,
+ * with a trailing new line.
+ */
 
 /* The ActionTableGenerator creates ActionTables for a given context-free
  * grammer. It is an pure virtual / abstract type.

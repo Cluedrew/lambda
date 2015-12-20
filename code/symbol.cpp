@@ -82,10 +82,8 @@ std::istream & operator>> (std::istream & in, SymbolEnum & sym)
   else STRTOSYM(ELEMENT)
   else STRTOSYM(FUNCTION)
   else STRTOSYM(APPLICATION)
-
 #undef STRTOSYM
-
-  // else in.failbit = true or something.
+  else in.setstate(std::ios_base::badbit);
 
   return in;
 }
