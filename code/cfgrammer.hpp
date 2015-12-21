@@ -29,7 +29,22 @@ struct CFGrammer
    * Return: A new CFGrammer.
    * Except: ??
    * Format: A grammer must be speified in the following way:
-   *   ???
+   *   A
+   *   (SYMBOL){A}
+   *   B
+   *   (SYMBOL){B}
+   *   SYMBOL
+   *   C
+   *   (RULE){C}
+   * Where A, B & C are non-negative integers. A is the number of terminal
+   *   symbols in the language and is followed by a list of terminal symbols,
+   *   one per line. B is the number of nonterminal symbols in the language
+   *   and is followed by a list of nonterminal symbols, one per line. Then
+   *   comes the start symbol. C is the number of production rules and is
+   *   followed by a list of rules, one per line.
+   * Note that after the data is read in the rest of the line is discarded.
+   *   If the data has a distinct end the rest of the line can be used for
+   *   other data ignored by this function. (ex. Section labels)
    */
 };
 

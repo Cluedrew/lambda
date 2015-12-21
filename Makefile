@@ -13,8 +13,7 @@ EXE=lambda
 
 # The base name of every code file used to create the binary.
 FILENAMES=main tokenizer parse-node symbol rule-item cfgrammer action-table \
-	slr1-atg sr-op
-#main element tokenizer
+	slr1-atg sr-op #element
 
 # Leave empty to compile for release, otherwise system compiles for debugging.
 USE_DEBUG=

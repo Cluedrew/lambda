@@ -4,12 +4,13 @@
 // Structure that repersents a substution operation.
 // [ replaces / replaced ]
 
+#include "parse-fwd.hpp"
 class Element;
 
 struct SubstutionOp
 {
-  char replaced;
-  Element * replaces;
+  TextT replaced;
+  Element const & replaces;
 };
 
 #endif//SUBSTUTION_OP_HPP
