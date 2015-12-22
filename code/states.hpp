@@ -53,7 +53,11 @@ public:
    */
 
   std::pair<bool, StateT> addState (LabelT_ const & label);
-  // Attempt to add a new state with the default payload.
+  /* Attempt to add a new state with the given label.
+   * Params:
+   * Effect:
+   * Return:
+   */
 
   bool isTrans (StateT from, TransT_ by);
   // Is a given transition/edge out from a state defined?

@@ -29,7 +29,7 @@ bool isSymbol (SymbolEnum sym)
 
 // Getters ===================================================================
 // Get the eof symbol.
-SymbolEnum getEof ()
+SymbolEnum getEofSymbol ()
 { return SymbolEnum::eof; }
 
 // Type Conversion Functions =================================================

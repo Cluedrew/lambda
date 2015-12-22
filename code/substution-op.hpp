@@ -11,6 +11,10 @@ struct SubstutionOp
 {
   TextT replaced;
   Element const & replaces;
+
+  SubstutionOp (TextT var, Element const & val) :
+    replaced(var), replaces(val)
+  {}
 };
 
 #endif//SUBSTUTION_OP_HPP

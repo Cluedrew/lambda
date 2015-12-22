@@ -75,19 +75,19 @@ bool Item::operator!= (Item const & other) const
 
 // Conversion Functions ======================================================
 // Get a fresh Item from a Rule
-Item Rule::getFresh ()
+Item Rule::getFresh () const
 {
   return Item{lhs, rhs, 0};
 }
 
 // Get the base Rule for this Item.
-Rule Item::getBase ()
+Rule Item::getBase () const
 {
   return Rule{lhs, rhs};
 }
 
 // Get a new Item that is this Item progressed by one.
-Item Item::getNext ()
+Item Item::getNext () const
 {
   return Item{lhs, rhs, place + 1};
 }

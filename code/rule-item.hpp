@@ -20,7 +20,7 @@ struct Rule
   bool operator!= (Rule const &) const;
 
   // Return a fresh item from this production Rule.
-  Item getFresh ();
+  Item getFresh () const;
 };
 
 // The Item
@@ -35,9 +35,9 @@ struct Item // : public Rule
   bool operator!= (Item const &) const;
 
   // Return the base production Rule of the item.
-  Rule getBase ();
+  Rule getBase () const;
   // Return a new Item that is this item progressed by one.
-  Item getNext ();
+  Item getNext () const;
 };
 
 std::ostream & operator<< (std::ostream &, Rule const &);

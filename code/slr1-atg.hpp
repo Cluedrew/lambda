@@ -31,6 +31,7 @@
 #include "cfgrammer.hpp"
 #include "states.hpp"
 #include "rule-item.hpp"
+#include "symbol.hpp"
 
 class Slr1Atg : public ActionTableGenerator
 {

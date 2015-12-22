@@ -13,7 +13,7 @@ EXE=lambda
 
 # The base name of every code file used to create the binary.
 FILENAMES=main tokenizer parse-node symbol rule-item cfgrammer action-table \
-	slr1-atg sr-op #element
+	slr1-atg sr-op element
 
 # Leave empty to compile for release, otherwise system compiles for debugging.
 USE_DEBUG=
@@ -39,9 +39,7 @@ CXXFLAGS+=${if ${USE_DEBUG},${DEBUG},}
 
 ### Recipes and Rules
 
-# Small temperary change, skipping the executable and just making the objfiles
-#all : ${EXE}
-all : ${OBJFILES}
+all : ${EXE}
 
 # Rule for the binary
 ${EXE} : ${OBJFILES}

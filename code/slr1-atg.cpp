@@ -280,32 +280,80 @@ void Slr1Atg::calcStateGraph ()
   // Process each state by progressing items by one.
   for (StateT proc = 0 ; stateGraph.isState(proc) ; ++proc)
   {
-    // For each symbol, find the destState.
-    // Would it be faster to go by Rules or Symbols?
-  }
+    // For each Item's next symbol, find the destState.
+    LabelT const & curLabel = stateGraph.lookUp(proc);
 
-  /* Each state is the set of Items we could be proccessing.
-   * Transitions out of a state repersent shift operations that would
-   * progress an Item (or Items) in the state. The starting state starts with
-   * just the fresh Item of the starting symbols rules (?).
-   *
-   * After a new State is created for all Rules that are about to read in a
-   * non-terminal symbol the fresh Item for every rule with that symbol on the
-   * lhs. Recusively if needed.
-   *
-   * Actually this part, generating the StateGraph, might be worth taking out.
-   */
+    // Track which ones have been used to avoid repeats.
+    // Add eof to prevent the eof from being shifted on.
+    std::set<SymbolT> usedSymbols;
+    usedSymbols.insert(getEofSymbol());
+
+    for (LabelT::const_iterator it = curLabel.cbegin() ;
+         it != curLabel.cend() ; ++it)
+    {
+      // Make sure the Item has a next symbol.
+      if (it->cr() <= it->place)
+        continue;
+      // Make sure it hasn't already been used.
+      else if (0 == usedSymbols.count(it->rhs[it->place]))
+      {
+        // Recored that the symbol has been used.
+        SymbolT nextSymbol = it->rhs[it->place];
+        usedSymbols.insert(nextSymbol);
+        // Look up/create its destState.
+        // This will also create the required transition.
+        std::pair<bool, StateT> destID = destState(proc, nextSymbol);
+        // For every edge there is a shift operation, hence we insert a shift
+        // if the destState exists.
+        if (destID.first)
+        {
+          data[std::make_pair(proc, nextSymbol)]
+              .push_back(SROp::shiftOp(destID.second));
+        }
+      }
+    }
+  }
 }
 
 // Callculate the SROps using nullable, first & follow -----------------------
-void calcOperations ()
+void Slr1Atg::calcOperations ()
 {
-  /* After the state graph has been generated the graph can be used to define
-   * most (all?) the shift operations, one for each transition in the graph.
-   * Reduce operations require the follow sets. Each time a "Full Item" is
-   * encountered in a state a reduce operation is defined from that state, by
-   * each symbol in the Item's lhs, for the Item's base Rule.
+  /* The done and shift operations are now inserted during the calculation
+   * of the graph, which just leaves the reduce operations.
+   *
+   * A reduce operation for a Rule is inserted whenever:
+   * A) The StateT contains a "full Item" (cr()==place) for that Rule and...
+   * B) the look ahead symbol is in the Rule's lhs symbol's follow set.
    */
+  // First Go through all the states.
+  for (StateT id = 0 ; stateGraph.isState(id) ; ++id)
+  {
+    // Then go through all the Items in the state's label.
+    LabelT const & curLabel = stateGraph.lookUp(id);
+    for (LabelT::const_iterator it = curLabel.cbegin() ;
+         it != curLabel.cend() ; ++it)
+    {
+      // Now check if it is a full Item.
+      if (it->cr() == it->place)
+      {
+        // Get the lhs follow set.
+        std::set<SymbolT> following = symbols[it->lhs].follow;
+
+        // Get the number of the Rule in the grammer.
+        // (Should always be found.)
+        unsigned int ruleN;
+        Rule baseRule = it->getBase();
+        for (ruleN = 0 ; grammer.rules.at(ruleN) != baseRule ; ++ruleN);
+
+        // Add a reduce operation for every symbol in it.
+        for (std::set<SymbolT>::const_iterator jt = following.cbegin() ;
+             jt != following.cend() ; ++jt)
+        {
+          data[std::make_pair(id, *jt)].push_back(SROp::reduceOp(ruleN));
+        }
+      }
+    }
+  }
 }
 
 // ===========================================================================
@@ -314,6 +362,7 @@ void calcOperations ()
  */
 void Slr1Atg::preformAllCalc ()
 {
+  // First get all of the symbol data.
   bool change;
 #define REPEAT_OVER_RULES(calcFunc) \
   do { \
@@ -328,6 +377,11 @@ void Slr1Atg::preformAllCalc ()
   REPEAT_OVER_RULES(calcFollow)
 
 #undef REPEAT_OVER_RULES
+
+  // Now create the State Graph
+  calcStateGraph();
+  // Finally, used the data from above to find all the operations.
+  calcOperations();
 }
 
 // Implementation Functions ==================================================

@@ -11,6 +11,7 @@
  */
 
 #include <ostream>
+#include <vector>
 #include "parse-fwd.hpp"
 class ParseNode;
 class SubstutionOp;
@@ -88,7 +89,7 @@ struct Element
   bool isClosed () const;
   // Check to see if the element is closed.
 
-  bool isClosedWith (std::vector<Variable *> bounded) const;
+  bool isClosedWith (std::vector<Variable const *> bounded) const;
   // Check to see if the element is closed within a given context.
 
   bool isExpression () const;
@@ -102,7 +103,7 @@ struct Element
    * Except:
    */
 
-  Element * apply (Element const & value) const
+  Element * apply (Element const & value) const;
   /* Get the result of an application on a function.
    * Params: A constaint reference to the value taken as the argument.
    * Effect:
