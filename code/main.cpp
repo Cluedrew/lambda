@@ -16,6 +16,7 @@ int main (int argc, char * argv[])
   std::ifstream defFile("lang.cfg");
   CFGrammer cfg = CFGrammer::defineFromText(defFile);
   defFile.close();
+  std::cout << cfg;
 
   std::cout << "Perparing ActionTableGenerator" << std::endl;
   Slr1Atg atg(cfg);

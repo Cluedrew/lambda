@@ -5,6 +5,8 @@
 #include <string>
 #include <sstream>
 #include <queue>
+#include <istream>
+#include <ostream>
 #include "symbol.hpp"
 
 // Helper Functions ==========================================================
@@ -14,7 +16,7 @@ static std::string whitespace = std::string(" \t\n\r");
 
 // Get the next non-empty non-commented line from input.
 // This is used to break up lines
-static std::istringstream & getGoodLine (std::istream & in)
+static std::string getGoodLine (std::istream & in)
 {
   // Unfortunatly I can't seem to return stringstreams. To get around that
   // I'm returning a refence to a perminate stream.
@@ -27,17 +29,16 @@ static std::istringstream & getGoodLine (std::istream & in)
     getline(in, line);
   }
   while (line.find_first_not_of(whitespace) == line.npos);
-  iss.str(line);
-  return iss;
+  return line;
 }
 
 // Convert a character stream into a set.
 template<typename T>
 static std::set<T> streamToSet
-    (T (*mapping)(std::istringstream &), std::istream & in)
+    (T (*mapping)(std::string), std::istream & in)
 {
   // Get the size of the set.
-  std::istringstream & tmp = getGoodLine(in);
+  std::istringstream tmp(getGoodLine(in));
   int n;
   tmp >> n;
 
@@ -54,10 +55,10 @@ static std::set<T> streamToSet
 // Convert a character stream into a verctor.
 template<typename T>
 static std::vector<T> streamToVector
-    (T (*mapping)(std::istringstream &), std::istream & in)
+    (T (*mapping)(std::string), std::istream & in)
 {
   // Get the size of the vector.
-  std::istringstream & tmp = getGoodLine(in);
+  std::istringstream tmp(getGoodLine(in));
   int n;
   tmp >> n;
 
@@ -73,21 +74,20 @@ static std::vector<T> streamToVector
 
 // Mapping Funtions ==========================================================
 // Get a single symbol from the front of the stream and discard the rest.
-static SymbolT lineToSymbolT (std::istringstream & ss)
+static SymbolT lineToSymbolT (std::string line)
 {
+  std::istringstream ss(line);
   SymbolT fin;
   ss >> fin;
   return fin;
 }
 
 // Read in symbols from the line, the first is the lhs, the rest the rhs.
-static Rule lineToRule (std::istringstream & ss)
+static Rule lineToRule (std::string line)
 {
+  std::istringstream ss(line);
   Rule rule;
-  ss >> rule.lhs;
-  SymbolT sym;
-  while (ss >> sym)
-    rule.rhs.push_back(sym);
+  ss >> rule;
   return rule;
 }
 
@@ -110,6 +110,41 @@ CFGrammer CFGrammer::defineFromText (std::istream & in)
   fin.rules = streamToVector<Rule>(lineToRule, in);
 
   return fin;
+}
+
+// CFG I/O ===================================================================
+// Read a Context-Free Grammer from a stream.
+std::istream & operator>> (std::istream & in, CFGrammer & cfg)
+{
+  CFGrammer tmpGrammer = CFGrammer::defineFromText(in);
+  cfg = tmpGrammer;
+  return in;
+}
+
+// Write a Context-Free Grammer to a stream.
+std::ostream & operator<< (std::ostream & out, CFGrammer const & cfg)
+{
+  // Terminal Symbols
+  out << cfg.terminals.size() << std::endl;
+  for (std::set<SymbolT>::const_iterator it = cfg.terminals.cbegin() ;
+       it != cfg.terminals.cend() ; ++it)
+    out << *it << std::endl;
+
+  // NonTerminal Symbols
+  out << cfg.nonTerminals.size() << std::endl;
+  for (std::set<SymbolT>::const_iterator it = cfg.nonTerminals.cbegin() ;
+       it != cfg.nonTerminals.cend() ; ++it)
+    out << *it << std::endl;
+
+  // Start Symbol
+  out << cfg.start << std::endl;
+
+  // Production Rules
+  out << cfg.rules.size() << std::endl;
+  for (unsigned int i = 0 ; i < cfg.rules.size() ; ++i)
+    out << cfg.rules[i];
+
+  return out;
 }
 
 // Iterators =================================================================

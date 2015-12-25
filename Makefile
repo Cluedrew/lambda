@@ -16,7 +16,7 @@ FILENAMES=main tokenizer parse-node symbol rule-item cfgrammer action-table \
 	slr1-atg sr-op element
 
 # Leave empty to compile for release, otherwise system compiles for debugging.
-USE_DEBUG=
+USE_DEBUG=yes
 
 # C++ Compiler
 CXX=g++

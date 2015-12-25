@@ -48,6 +48,14 @@ struct CFGrammer
    */
 };
 
+std::istream & operator>> (std::istream & in, CFGrammer & cfg);
+/* Read a Context-Free Grammer from a stream.
+ */
+
+std::ostream & operator<< (std::ostream & out, CFGrammer const & cfg);
+/* Write a Context-Free Grammer to a stream.
+ */
+
 // Iterator Class
 // If you want to iterate through Rules with a given lhs, use this.
 class MatchLeftIterator

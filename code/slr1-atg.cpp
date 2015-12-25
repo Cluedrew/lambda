@@ -6,6 +6,13 @@
 #include <iostream>
 #include "symbol.hpp"
 
+// DEBUG_OUT prints on DEBUG, vanishes otherwise.
+#ifdef DEBUG
+#define DEBUG_OUT(msg) std::cerr << "DEBUG: " << msg << std::endl;
+#else
+#define DEBUG_OUT(msg)
+#endif
+
 // Constructors and Deconstructor ============================================
 // Create a basic Slr1Atg for the given CFG.
 Slr1Atg::Slr1Atg (CFGrammer cfg) :
@@ -207,11 +214,13 @@ Slr1Atg::LabelT Slr1Atg::shiftGroup (LabelT const & label, SymbolT sym)
  */
 std::pair<bool, StateT> Slr1Atg::destState (StateT state, SymbolT sym)
 {
+  DEBUG_OUT("destState: from " << state << " by ")
   // Find the kernal of the new state
   LabelT nLabel = shiftGroup(stateGraph.lookUp(state), sym);
   // If empty delete any existing edge and stop.
   if (nLabel.empty())
   {
+    DEBUG_OUT("... is empty.")
     stateGraph.delTrans(state, sym);
     return std::make_pair(false, 0);
   }
@@ -220,6 +229,7 @@ std::pair<bool, StateT> Slr1Atg::destState (StateT state, SymbolT sym)
   // Get the id of the state with that label, wheither new or old.
   StateT id = stateGraph.addState(nLabel).second;
   // Connect them (check for existing transition?)
+  DEBUG_OUT("... connects to " << id)
   stateGraph.setTrans(state, sym, id);
   return std::make_pair(true, id);
 }

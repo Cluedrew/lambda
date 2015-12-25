@@ -80,7 +80,8 @@ SymbolEnum stringToSymbol (std::string string)
 #undef STRTOSYM
 
   else
-    throw std::invalid_argument("symbolToString: invalid argument");
+    throw std::invalid_argument(
+        std::string("stringToSymbol: invalid argument: ") + string);
 }
 
 // In/Output Operators =======================================================
