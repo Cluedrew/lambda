@@ -28,27 +28,6 @@ Slr1Atg::Slr1Atg (CFGrammer cfg) :
 
   // Calculate the fill in all the SymbolData for all symbols.
   preformAllCalc();
-
-  // Calculate nullable
-  // A symbol is nullable if it:
-  // - Is the left hand side of a Rule with an empty right hand side.
-  // - Is the left hand side of a Rule that entirely nullable symbols.
-  // - Hence Terminals are never nullable.
-
-  // Calculate first
-  // The first set for a symbol S is:
-  // - If S is Terminal: itself.
-  // - If S is Nonterminal: the union of every first set of every symbol that
-  //   appears in the rhs of a Rule with S as the lhs and ever symbol before
-  //   the symbol on the rhs is nullable. (So always the first, the second if
-  //   the first is nullable, the third if the first and the second are...)
-
-  // Calculate follow
-  // The follow set for a symbol S is:
-  // - The union of first sets of symbols that follow S on the rhs of a Rule,
-  //   either directly or seperated by nullable symbols.
-  // - If S is the last symbol in a Rule's rhs (or all following symbols are
-  //   nullable) than also union the follow set of the Rule's lhs symbol.
 }
 
 Slr1Atg::~Slr1Atg ()
@@ -75,6 +54,12 @@ Slr1Atg::SymbolData::SymbolData (SymbolT sym) :
 // Rule -> Boolean * rule to proccess -> did that change anything
 // Also they have to be run in order.
 
+/* Calculate nullable
+ * A symbol is nullable if it:
+ * - Is the left hand side of a Rule with an empty right hand side.
+ * - Is the left hand side of a Rule that entirely nullable symbols.
+ * - Hence Terminals are never nullable.
+ */
 bool Slr1Atg::calcNullable (Rule rule)
 {
   // We never need to re-check nullable symbols.
@@ -98,6 +83,14 @@ bool Slr1Atg::calcNullable (Rule rule)
     return false;
 }
 
+/* Calculate first
+ * The first set for a symbol S is:
+ * - If S is Terminal: itself.
+ * - If S is Nonterminal: the union of every first set of every symbol that
+ *   appears in the rhs of a Rule with S as the lhs and ever symbol before
+ *   the symbol on the rhs is nullable. (So always the first, the second if
+ *   the first is nullable, the third if the first and the second are...)
+ */
 bool Slr1Atg::calcFirst (Rule rule)
 {
   // The set we might modify and whether it has changed.
@@ -122,6 +115,13 @@ bool Slr1Atg::calcFirst (Rule rule)
   return hasChanged;
 }
 
+/* Calculate follow
+ * The follow set for a symbol S is:
+ * - The union of first sets of symbols that follow S on the rhs of a Rule,
+ *   either directly or seperated by nullable symbols.
+ * - If S is the last symbol in a Rule's rhs (or all following symbols are
+ *   nullable) than also union the follow set of the Rule's lhs symbol.
+ */
 bool Slr1Atg::calcFollow (Rule rule)
 {
   // Keep a look out for any changes.
@@ -159,8 +159,10 @@ bool Slr1Atg::calcFollow (Rule rule)
 
 // ===========================================================================
 // Fill a state from its kurnal to a complete state.
-void Slr1Atg::fillState (LabelT & state)
+Slr1Atg::LabelT Slr1Atg::fillState (LabelT const & kurnal)
 {
+  LabelT state(kurnal);
+
   // For each Item in the state ...
   for (unsigned int i = 0 ; i < state.size() ; ++i)
   {
@@ -182,12 +184,17 @@ void Slr1Atg::fillState (LabelT & state)
         for (std::vector<Item>::const_iterator jt = state.cbegin() ;
             jt != state.cend() ; ++jt)
           if (freshItem == *jt)
-            { unique = false; break; }
-        // If this is unique for this state at it to the state.
-        if (unique) state.push_back(freshItem);
+          {
+            unique = false;
+            break;
+          }
+        // If this is unique for this state add it to the state.
+        if (unique)
+          state.push_back(freshItem);
       }
     }
   }
+  return state;
 }
 
 // Find the subset of a state's items that can be advanced/shifted with sym.
@@ -225,7 +232,7 @@ std::pair<bool, StateT> Slr1Atg::destState (StateT state, SymbolT sym)
     return std::make_pair(false, 0);
   }
   // Otherwise expand the label.
-  fillState(nLabel);
+  nLabel = fillState(nLabel);
   // Get the id of the state with that label, wheither new or old.
   StateT id = stateGraph.addState(nLabel).second;
   // Connect them (check for existing transition?)
@@ -274,7 +281,7 @@ void Slr1Atg::calcStateGraph ()
   StateT startState;
   {
     LabelT startLabel = std::vector<Item>(1, imaginaryRule.getFresh());
-    fillState(startLabel);
+    startLabel = fillState(startLabel);
     stateGraph.setStart(
         (startState = stateGraph.addState(startLabel).second) );
   }

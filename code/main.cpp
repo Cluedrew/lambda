@@ -10,12 +10,19 @@
 #include "slr1-atg.hpp"
 #include "action-table.hpp"
 
+// Given a file name, return a CFG read from it.
+CFGrammer readCFGFromFile (char const * fileName)
+{
+  std::ifstream defFile(fileName);
+  CFGrammer cfg = CFGrammer::defineFromText(defFile);
+  defFile.close();
+  return cfg;
+}
+
 int main (int argc, char * argv[])
 {
   std::cout << "Perparing Grammer" << std::endl;
-  std::ifstream defFile("lang.cfg");
-  CFGrammer cfg = CFGrammer::defineFromText(defFile);
-  defFile.close();
+  CFGrammer cfg = readCFGFromFile("lang.cfg");
   std::cout << cfg;
 
   std::cout << "Perparing ActionTableGenerator" << std::endl;
@@ -29,5 +36,8 @@ int main (int argc, char * argv[])
     return 0;
   }
   else
+  {
+    std::cout << "Invalid Generator" << std::endl;
     return 1;
+  }
 }

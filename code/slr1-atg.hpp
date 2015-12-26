@@ -54,24 +54,27 @@ private:
     std::set<SymbolT> follow;
   };
 
+  // Fields:
   CFGrammer const grammer;
   std::map<std::pair<StateT,SymbolT>, std::vector<SROp> > data;
   std::map<SymbolT, SymbolData> symbols;
   StateMachine<LabelT, SymbolT, LabelTEquals> stateGraph;
 
-  // SymbolData Calculators.
+  // SymbolData Calculators:
   bool calcNullable (Rule);
   bool calcFirst (Rule);
   bool calcFollow (Rule);
 
-  // stateGraph Calculators.
-  void fillState (std::vector<Item> & state);
+  // stateGraph Calculators:
+  LabelT fillState (LabelT const & kurnal);
   LabelT shiftGroup (LabelT const & state, SymbolT sym);
   std::pair<bool, StateT> destState (StateT state, SymbolT sym);
   void calcStateGraph ();
 
+  // data/sr-op Calculator:
   void calcOperations ();
 
+  // Overhead for the above Calulators:
   void preformAllCalc ();
 
 protected:
