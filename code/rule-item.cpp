@@ -1,11 +1,28 @@
 #include "rule-item.hpp"
 
-// Implementation of cr() and << for Rule and Item
+// Implementation of cr() and << for Rule and Item... and so much more now.
 
 #include <ostream>
 #include <istream>
 #include <sstream>
 #include "symbol.hpp"
+
+// Constructors and <s>Deconstructor</s>
+Rule::Rule(SymbolT lhs, std::vector<SymbolT> rhs) :
+    lhs(lhs), rhs(rhs)
+{}
+
+Rule::Rule() :
+    lhs(), rhs()
+{}
+
+Item::Item(SymbolT lhs, std::vector<SymbolT> rhs, unsigned int place) :
+    lhs(lhs), rhs(rhs), place(place)
+{}
+
+Item::Item() :
+    lhs(), rhs(), place(0)
+{}
 
 // count right, rhs.size()
 unsigned int Rule::cr () const
@@ -77,19 +94,19 @@ bool Item::operator!= (Item const & other) const
 // Get a fresh Item from a Rule
 Item Rule::getFresh () const
 {
-  return Item{lhs, rhs, 0};
+  return Item(lhs, rhs, 0);
 }
 
 // Get the base Rule for this Item.
 Rule Item::getBase () const
 {
-  return Rule{lhs, rhs};
+  return Rule(lhs, rhs);
 }
 
 // Get a new Item that is this Item progressed by one.
 Item Item::getNext () const
 {
-  return Item{lhs, rhs, place + 1};
+  return Item(lhs, rhs, place + 1);
 }
 
 // I/O =======================================================================

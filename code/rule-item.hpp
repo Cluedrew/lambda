@@ -12,6 +12,8 @@ struct Item;
 // The production Rule
 struct Rule
 {
+  Rule(SymbolT, std::vector<SymbolT>);
+  Rule();
   SymbolT lhs;
   std::vector<SymbolT> rhs;
   unsigned int cr () const; // count right, rhs.size()
@@ -26,6 +28,8 @@ struct Rule
 // The Item
 struct Item // : public Rule
 {
+  Item(SymbolT, std::vector<SymbolT>, unsigned int);
+  Item();
   SymbolT lhs;
   std::vector<SymbolT> rhs;
   unsigned int place; // In the range of [0..cr()]

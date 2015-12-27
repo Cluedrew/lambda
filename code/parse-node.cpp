@@ -76,8 +76,7 @@ ParseNode const * ParseNode::child (unsigned int i) const
 // Get the Production Rule this node reperents.
 Rule ParseNode::getRule () const
 {
-  Rule fin;
-  fin.lhs = head;
+  Rule fin(head, std::vector<SymbolT>());
   for (unsigned int i = 0 ; i < children.size() ; ++i)
     fin.rhs.emplace_back(children[i]->getHead());
   return fin;

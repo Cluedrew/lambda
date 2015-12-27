@@ -56,17 +56,17 @@ std::ostream & operator<< (std::ostream & out, CFGrammer const & cfg);
 /* Write a Context-Free Grammer to a stream.
  */
 
-// Iterator Class
+// Forward Constaint Iterator Class
 // If you want to iterate through Rules with a given lhs, use this.
 class MatchLeftIterator
 {
 private:
   SymbolT match;
-  std::vector<Rule>::iterator at;
-  std::vector<Rule>::iterator end;
+  std::vector<Rule>::const_iterator at;
+  std::vector<Rule>::const_iterator end;
 protected:
 public:
-  MatchLeftIterator(SymbolT match, CFGrammer grammer);
+  MatchLeftIterator(SymbolT match, CFGrammer const & grammer);
   /* Create a new MatchLeftIterator for a match value and grammer.
    * Params: match is the symbol to be matched, when the iterator is
    *   incremented it will skip over Rules in the grammer that have a lhs
@@ -83,9 +83,9 @@ public:
   MatchLeftIterator operator++ (int);
   // Post-Increment Operator: Skips rules with a non-matching lhs.
 
-  Rule & operator* ();
+  Rule const & operator* ();
   // Derefernce Operator
-  Rule * operator-> ();
+  Rule const * operator-> ();
   // Member Dereference Operator
 };
 

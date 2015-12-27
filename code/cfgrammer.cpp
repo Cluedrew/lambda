@@ -151,8 +151,8 @@ std::ostream & operator<< (std::ostream & out, CFGrammer const & cfg)
 // A thought experament: going through rules for something that matches the
 // for rules that match the left hand side is common.
 // (I ended up trying to make a general version called the filter-iterator.)
-MatchLeftIterator::MatchLeftIterator(SymbolT match, CFGrammer grammer) :
-  match(match), at(grammer.rules.begin()), end(grammer.rules.end())
+MatchLeftIterator::MatchLeftIterator(SymbolT match, CFGrammer const& grammer) :
+  match(match), at(grammer.rules.cbegin()), end(grammer.rules.cend())
 {
   while (at != end && at->lhs != match) ++at;
 }
@@ -173,9 +173,9 @@ MatchLeftIterator MatchLeftIterator::operator++ (int)
   return tmp;
 }
 
-Rule & MatchLeftIterator::operator* ()
+Rule const & MatchLeftIterator::operator* ()
 { return at.operator*(); }
-Rule * MatchLeftIterator::operator-> ()
+Rule const * MatchLeftIterator::operator-> ()
 { return at.operator->(); }
 
 /*
