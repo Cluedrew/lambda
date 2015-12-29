@@ -54,9 +54,10 @@ public:
 
   std::pair<bool, StateT> addState (LabelT_ const & label);
   /* Attempt to add a new state with the given label.
-   * Params:
-   * Effect:
-   * Return:
+   * Params: The label of a state.
+   * Effect: If no state with label exists, then a new state is created.
+   * Return: (b, s) where b is wheither the state was created and s is
+   *   the id of the state with label in the state machine.
    */
 
   bool isTrans (StateT from, TransT_ by);

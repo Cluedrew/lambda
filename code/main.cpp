@@ -10,6 +10,9 @@
 #include "slr1-atg.hpp"
 #include "action-table.hpp"
 
+#include <functional>
+#include "parse-fwd.hpp"
+
 // Given a file name, return a CFG read from it.
 CFGrammer readCFGFromFile (char const * fileName)
 {

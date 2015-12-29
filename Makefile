@@ -65,7 +65,9 @@ deepclean : clean
 
 # Phony rule for running the test wrapper
 test : ${EXE}
-	gdb ./${EXE}
+#	gdb ./${EXE}
+	valgrind ./${EXE}
+# Better way to select the test wrapper, opition, setting, two rules?
 
 ### Include Depends Files
 

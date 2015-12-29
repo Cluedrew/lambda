@@ -13,6 +13,16 @@
 #define DEBUG_OUT(msg)
 #endif
 
+// Local function to check if a vector has a member
+template <typename T>
+static bool hasMember (std::vector<T> const & vec, T const & mem)
+{
+  for (unsigned int i = 0 ; i < vec.size() ; ++i)
+    if (vec[i] == mem)
+      return true;
+  return false;
+}
+
 // Constructors and Deconstructor ============================================
 // Create a basic Slr1Atg for the given CFG.
 Slr1Atg::Slr1Atg (CFGrammer cfg) :
@@ -202,8 +212,8 @@ Slr1Atg::LabelT Slr1Atg::shiftGroup (LabelT const & label, SymbolT sym)
 {
   LabelT fin;
   for (LabelT::const_iterator it = label.begin() ; it != label.end() ; ++it)
-    if (sym == it->rhs[it->place])
-      fin.push_back(*it);
+    if (it->place < it->cr() && sym == it->rhs[it->place])
+      fin.push_back(it->getNext());
   return fin;
 }
 
@@ -221,7 +231,7 @@ Slr1Atg::LabelT Slr1Atg::shiftGroup (LabelT const & label, SymbolT sym)
  */
 std::pair<bool, StateT> Slr1Atg::destState (StateT state, SymbolT sym)
 {
-  DEBUG_OUT("destState: from " << state << " by ")
+  DEBUG_OUT("destState: from " << state << " by " << sym)
   // Find the kernal of the new state
   LabelT nLabel = shiftGroup(stateGraph.lookUp(state), sym);
   // If empty delete any existing edge and stop.
@@ -234,9 +244,10 @@ std::pair<bool, StateT> Slr1Atg::destState (StateT state, SymbolT sym)
   // Otherwise expand the label.
   nLabel = fillState(nLabel);
   // Get the id of the state with that label, wheither new or old.
-  StateT id = stateGraph.addState(nLabel).second;
+  std::pair<bool, StateT> addResult = stateGraph.addState(nLabel);
+  StateT id = addResult.second;
   // Connect them (check for existing transition?)
-  DEBUG_OUT("... connects to " << id)
+  DEBUG_OUT("... connects to " << id << " (new? " << addResult.first << ")")
   stateGraph.setTrans(state, sym, id);
   return std::make_pair(true, id);
 }
@@ -270,6 +281,7 @@ void Slr1Atg::calcStateGraph ()
     imaginaryRule.lhs = getEofSymbol();
   }
   Item imaginaryItem1 = imaginaryRule.getFresh();
+  Item imaginaryItem2 = imaginaryItem1.getNext();
 
   // ===== Beginning and End State Set Up =====
   // The trick is to set up these special cases so they don't conflict
@@ -280,10 +292,10 @@ void Slr1Atg::calcStateGraph ()
   // Use the imaginaryRule as the kurnal, fill out the state.
   StateT startState;
   {
-    LabelT startLabel = std::vector<Item>(1, imaginaryRule.getFresh());
+    LabelT startLabel = std::vector<Item>(1, imaginaryItem1);
     startLabel = fillState(startLabel);
-    stateGraph.setStart(
-        (startState = stateGraph.addState(startLabel).second) );
+    startState = stateGraph.addState(startLabel).second;
+    stateGraph.setStart(startState);
   }
 
   // Set up the end state. (state 1)
@@ -302,21 +314,20 @@ void Slr1Atg::calcStateGraph ()
 
     // Track which ones have been used to avoid repeats.
     // Add eof to prevent the eof from being shifted on.
-    std::set<SymbolT> usedSymbols;
-    usedSymbols.insert(getEofSymbol());
+    std::vector<SymbolT> usedSymbols;
+    usedSymbols.push_back(getEofSymbol());
 
     for (LabelT::const_iterator it = curLabel.cbegin() ;
          it != curLabel.cend() ; ++it)
     {
       // Make sure the Item has a next symbol.
-      if (it->cr() <= it->place)
-        continue;
+      if (it->cr() > it->place &&
       // Make sure it hasn't already been used.
-      else if (0 == usedSymbols.count(it->rhs[it->place]))
+          hasMember(usedSymbols, it->rhs[it->place]))
       {
         // Recored that the symbol has been used.
         SymbolT nextSymbol = it->rhs[it->place];
-        usedSymbols.insert(nextSymbol);
+        usedSymbols.push_back(nextSymbol);
         // Look up/create its destState.
         // This will also create the required transition.
         std::pair<bool, StateT> destID = destState(proc, nextSymbol);

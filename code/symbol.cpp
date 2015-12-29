@@ -54,8 +54,7 @@ std::string symbolToString (SymbolEnum symbol)
 #undef SYMTOSTR
 
   default: // cap
-    throw std::invalid_argument("symbolToString: invalid argument");
-    return "";
+    throw std::invalid_argument("symbolToString: invalid argument: cap");
   }
 }
 

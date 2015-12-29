@@ -13,7 +13,7 @@ Rule::Rule(SymbolT lhs, std::vector<SymbolT> rhs) :
 {}
 
 Rule::Rule() :
-    lhs(), rhs()
+    lhs(), rhs(0)
 {}
 
 Item::Item(SymbolT lhs, std::vector<SymbolT> rhs, unsigned int place) :
@@ -21,7 +21,7 @@ Item::Item(SymbolT lhs, std::vector<SymbolT> rhs, unsigned int place) :
 {}
 
 Item::Item() :
-    lhs(), rhs(), place(0)
+    lhs(), rhs(0), place(0)
 {}
 
 // count right, rhs.size()
