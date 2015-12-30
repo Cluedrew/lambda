@@ -79,6 +79,14 @@ void ActionTable::delOp (StateT state, SymbolT symbol)
   if (data.count(index)) data.erase(index);
 }
 
+// Get the number of operations in the ActionTable.
+size_t ActionTable::numOfOps () const
+{
+  return data.size();
+}
+
+
+
 // Input and Output Operator Overloads =======================================
 // Print an ActionTable to a stream.
 std::ostream & operator<< (std::ostream & out, ActionTable const & at)

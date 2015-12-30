@@ -70,6 +70,11 @@ public:
    * Effect: Removes the given SROp from the ActionTable if it is defined.
    */
 
+  size_t numOfOps () const;
+  /* Get the number of operations in the ActionTable.
+   * Return: The number of ops.
+   */
+
   friend std::ostream & operator<< (std::ostream &, ActionTable const &);
   friend std::istream & operator>> (std::istream &, ActionTable &);
 };
@@ -84,6 +89,7 @@ std::ostream & operator<< (std::ostream &, ActionTable const &);
  * The number of operations in the table followed by all the operations,
  * with a trailing new line.
  */
+
 std::istream & operator>> (std::istream &, ActionTable &);
 /* Read an ActionTable from a stream.
  * Params: The input stream to read from and a reference to the ActionTable

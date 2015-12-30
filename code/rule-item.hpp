@@ -7,6 +7,9 @@
 // These need some cleaning, including a switch from
 // LHS -> RHS[..] to LHS ( RHS[..] ) or something to avoid the \n delimiter.
 
+// A reminder to change over the format.
+#define RI_IO_FORMATE "arrow"
+
 #include <iosfwd>
 #include <vector>
 #include "parse-fwd.hpp"
@@ -15,36 +18,67 @@ struct Item;
 // The production Rule
 struct Rule
 {
-  Rule(SymbolT, std::vector<SymbolT>);
-  Rule();
   SymbolT lhs;
   std::vector<SymbolT> rhs;
-  unsigned int cr () const; // count right, rhs.size()
+
+  Rule(SymbolT lhs, std::vector<SymbolT> rhs);
+  /* Create a new Rule with all fields specified.
+   * Params: Field values in order.
+   */
+
+  Rule();
+  // Create a new uninitalized Rule.
+
+  unsigned int cr () const;
+  /* Count Right: Get the size of the right hand side.
+   * Return: rhs.size()
+   */
+
   bool operator< (Rule const &) const;
   bool operator== (Rule const &) const;
   bool operator!= (Rule const &) const;
 
-  // Return a fresh item from this production Rule.
   Item getFresh () const;
+  /* Return a fresh item from this production Rule.
+   * Return: An Item with lhs & rhs equal to the Rule's fields and place = 0.
+   */
 };
 
 // The Item
-struct Item // : public Rule
+struct Item
 {
-  Item(SymbolT, std::vector<SymbolT>, unsigned int);
-  Item();
   SymbolT lhs;
   std::vector<SymbolT> rhs;
-  unsigned int place; // In the range of [0..cr()]
-  unsigned int cr () const; // count right, rhs.size()
+  // place should be in the range of [0..cr()]
+  unsigned int place;
+
+  Item(SymbolT lhs, std::vector<SymbolT> rhs, unsigned int place);
+  /* Create a new Item with all fields specified.
+   * Params: Field values in order.
+   */
+
+  Item();
+  // Create a new uninitalized Item.
+
+  unsigned int cr () const;
+  /* Count Right: Get the size of the right hand side.
+   * Return: rhs.size()
+   */
+
   bool operator< (Item const &) const;
   bool operator== (Item const &) const;
   bool operator!= (Item const &) const;
 
-  // Return the base production Rule of the item.
   Rule getBase () const;
-  // Return a new Item that is this item progressed by one.
+  /* Return the base production Rule of the item.
+   * Return: A new Rule with lhs & rhs equal to the Item's.
+   */
+
   Item getNext () const;
+  /* Return a new Item that is this item progressed by one.
+   * Return: A new Item equal to this one except that the place field
+   *   is incremented by one.
+   */
 };
 
 std::ostream & operator<< (std::ostream &, Rule const &);
