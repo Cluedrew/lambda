@@ -56,6 +56,8 @@ std::ostream & operator<< (std::ostream & out, CFGrammer const & cfg);
 /* Write a Context-Free Grammer to a stream.
  */
 
+
+
 // Forward Constaint Iterator Class
 // If you want to iterate through Rules with a given lhs, use this.
 class MatchLeftIterator

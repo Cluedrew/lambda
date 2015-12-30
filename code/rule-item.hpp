@@ -4,6 +4,9 @@
 // The production Rule structure and the Item there of.
 // Not that the constrants on Item are not enforced.
 
+// These need some cleaning, including a switch from
+// LHS -> RHS[..] to LHS ( RHS[..] ) or something to avoid the \n delimiter.
+
 #include <iosfwd>
 #include <vector>
 #include "parse-fwd.hpp"

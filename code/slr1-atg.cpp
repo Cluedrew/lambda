@@ -261,6 +261,9 @@ void Slr1Atg::calcStateGraph ()
   // Possibly insert some code to drain the graph so this doesn't break
   // everything if it is called twice.
 
+  // Store a local copy of the eof Symbol as we use it a lot here.
+  SymbolT const eofSymbol = getEofSymbol();
+
   /* ===== Create the Imaginary Production Rule =====
    *   -> S eof : The imaginary rule; not part of the grammer (although eof is
    * added to S's (the start symbol's) follow set as if it was. It gets rid
@@ -276,9 +279,9 @@ void Slr1Atg::calcStateGraph ()
   {
     std::vector<SymbolT> tmp_rhs;
     tmp_rhs.push_back(grammer.start);
-    tmp_rhs.push_back(getEofSymbol());
+    tmp_rhs.push_back(eofSymbol);
     imaginaryRule.rhs = tmp_rhs;
-    imaginaryRule.lhs = getEofSymbol();
+    imaginaryRule.lhs = eofSymbol;
   }
   Item imaginaryItem1 = imaginaryRule.getFresh();
   Item imaginaryItem2 = imaginaryItem1.getNext();
@@ -302,35 +305,42 @@ void Slr1Atg::calcStateGraph ()
   // Regular advancement on S from starting state, add the done operation
   // to the state on eof in look-ahead. (I am confident this will not fail.)
   StateT endState = destState(startState, grammer.start).second;
-  data[std::make_pair(endState, getEofSymbol())].push_back(SROp::doneOp());
+  data[std::make_pair(endState, eofSymbol)].push_back(SROp::doneOp());
 
   // ===== Intermediate State Set Up =====
   // Loop to create the remaining states.
   // Process each state by progressing items by one.
   for (StateT proc = 0 ; stateGraph.isState(proc) ; ++proc)
   {
-    // For each Item's next symbol, find the destState.
-    LabelT const & curLabel = stateGraph.lookUp(proc);
+    DEBUG_OUT("calcStateGraph: Extending state " << proc)
+
+    // For each Item's next symbol, find the destState. (A copy must be used
+    // as the reference becomes invalid as new states are added.)
+    LabelT const curLabel = stateGraph.lookUp(proc);
 
     // Track which ones have been used to avoid repeats.
-    // Add eof to prevent the eof from being shifted on.
-    std::vector<SymbolT> usedSymbols;
-    usedSymbols.push_back(getEofSymbol());
+    // "Use" eof to prevent the eof from being shifted on.
+    std::vector<SymbolT> usedSymbols(1, eofSymbol);
 
     for (LabelT::const_iterator it = curLabel.cbegin() ;
          it != curLabel.cend() ; ++it)
     {
+      DEBUG_OUT("(examining Item " << *it << ")")
+
       // Make sure the Item has a next symbol.
       if (it->cr() > it->place &&
-      // Make sure it hasn't already been used.
-          hasMember(usedSymbols, it->rhs[it->place]))
+          // Make sure it hasn't already been used.
+          !hasMember(usedSymbols, it->rhs[it->place]))
       {
         // Recored that the symbol has been used.
         SymbolT nextSymbol = it->rhs[it->place];
         usedSymbols.push_back(nextSymbol);
+        DEBUG_OUT("... by symbol " << nextSymbol)
+
         // Look up/create its destState.
         // This will also create the required transition.
         std::pair<bool, StateT> destID = destState(proc, nextSymbol);
+
         // For every edge there is a shift operation, hence we insert a shift
         // if the destState exists.
         if (destID.first)
@@ -368,16 +378,26 @@ void Slr1Atg::calcOperations ()
         std::set<SymbolT> following = symbols[it->lhs].follow;
 
         // Get the number of the Rule in the grammer.
-        // (Should always be found.)
         unsigned int ruleN;
         Rule baseRule = it->getBase();
-        for (ruleN = 0 ; grammer.rules.at(ruleN) != baseRule ; ++ruleN);
+        for (ruleN = 0 ; ruleN < grammer.rules.size() &&
+             grammer.rules.at(ruleN) != baseRule ; ++ruleN)
+        {}
 
-        // Add a reduce operation for every symbol in it.
-        for (std::set<SymbolT>::const_iterator jt = following.cbegin() ;
-             jt != following.cend() ; ++jt)
+        // Error catch: Rule not found.
+        if (ruleN >= grammer.rules.size())
         {
-          data[std::make_pair(id, *jt)].push_back(SROp::reduceOp(ruleN));
+          std::cerr << "Warring: rule '" << baseRule
+              << "' is not in grammer." << std::endl;
+        }
+        else
+        {
+          // Add a reduce operation for every symbol in it.
+          for (std::set<SymbolT>::const_iterator jt = following.cbegin() ;
+               jt != following.cend() ; ++jt)
+          {
+            data[std::make_pair(id, *jt)].push_back(SROp::reduceOp(ruleN));
+          }
         }
       }
     }
@@ -478,7 +498,14 @@ void Slr1Atg::printProblems (std::ostream & out) const
     {
       // Print conflict:
       out << '(' << it->first.first << ", " << it->first.second << ") has " <<
-          it->second.size() << " possible outcomes." << std::endl;
+          it->second.size() << " possible outcomes." << '\n';
+
+      // Print the conficting operations.
+      for (std::vector<SROp>::const_iterator jt = it->second.cbegin() ;
+          jt != it->second.cend() ; ++jt)
+        out << *jt << '\n';
+
+      out << std::flush;
     }
 }
 

@@ -14,12 +14,11 @@
  * from a given context free grammer. It will create shift operations to move
  * along the Prodctition Rules and reduce operations to convert the right hand
  * side into the left hand side.
- *   Also it will handle the eof symbol as a special case. Even if it does not
- * appear in any rules it will be assumed to follow the start symbol and
- * the parsing should be complete when a single start symbol has been read in
- * and the eof is next.
- *   For this reason if you use this genertor neither the start nor eof symbol
- * should appear on the right hand side of rules. That can generate conflict.
+ *
+ *   Also it will handle the eof symbol as a special case. The eof here is not
+ * treated as a token/symbol but as a centinal value that comes after the last
+ * token. It will not be shifted and it will always follow the start symbol at
+ * the end of parsing.
  */
 
 #include <iosfwd>
@@ -115,7 +114,10 @@ public:
   /* Print the problems that prevent a ActionTable from being generated.
    * Params: Stream to print to.
    * Effect: Characters are sent to stream.
-   * Format:
+   * Format: Prints:
+   *   (STATE, SYMBOL) has NUM possible outcomes.
+   *   For every STATE (as the id number) SYMBOL combination where there are
+   *   2 or more possible outcomes.
    */
 };
 
