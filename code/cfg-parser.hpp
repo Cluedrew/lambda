@@ -11,6 +11,7 @@
 #include "cfgrammer.hpp"
 class ParseNode;
 class Token;
+class TokenStream;
 
 class CFGParser
 {
@@ -29,7 +30,7 @@ public:
   virtual ~CFGParser ();
 
   ParseNode * parse (std::vector<Token> const &);
-  ParseNode * parse (TokenStream const &);
+  ParseNode * parse (TokenStream &);
   /* Parse a series or stream of tokens, producing a parse tree.
    * Params: A TokenStream to read from.
    * Effect: (stream only) Reads all tokens from the stream.

@@ -9,6 +9,7 @@
 #include "tokenizer.hpp"
 #include "slr1-atg.hpp"
 #include "action-table.hpp"
+#include "cfg-parser.hpp"
 
 // Given a file name, return a CFG read from it.
 CFGrammer readCFGFromFile (char const * fileName)
@@ -56,12 +57,10 @@ ActionTable readActionTableFromFile (char const * fileName)
   return at;
 }
 
+
 int main (int argc, char * argv[])
 {
-  CFGrammer cfg = readCFGFromFile("lang.cfg");
-  std::cout << cfg;
+  // Next Step, get a parser and parse with it.
 
-  ActionTable at = makeSlr1ActionTable (cfg);
-  std::cout << at;
-  return (0 == at.numOfOps()) ? 0 : 1;
+  return 0;
 }
