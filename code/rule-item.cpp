@@ -122,85 +122,6 @@ Item Item::getNext () const
 
 
 // I/O =======================================================================
-#if RI_IO_FORMAT == arrow
-
-// Print the Rule to the given stream.
-std::ostream & operator<< (std::ostream & out, Rule const & rule)
-{
-  out << rule.lhs << " ->";
-  for (unsigned int i = 0 ; i < rule.cr() ; ++i)
-    out << " " << rule.rhs[i];
-  return out << std::endl;
-}
-
-// Print the Item to the given stream.
-std::ostream & operator<< (std::ostream & out, Item const & item)
-{
-  //if (item.cr() < item.place) error.
-
-  out << item.lhs << " ->";
-  unsigned int i = 0;
-  for ( ; i < item.place ; ++i)
-    out << " " << item.rhs[i];
-  out << " *";
-  for ( ; i < item.cr() ; ++i)
-    out << " " << item.rhs[i];
-  return out << std::endl;
-}
-
-// Read a Rule from a stream.
-std::istream & operator>> (std::istream & in, Rule & rule)
-{
-  // I sort of cheated, to keep from writing it out twice, read in an
-  // item (with an invalid place field) then convert to a Rule.
-  Item item;
-  in >> item;
-  rule = item.getBase();
-  return in;
-}
-
-// Read an Item from a stream.
-std::istream & operator>> (std::istream & in, Item & item)
-{
-  // Set up variables and read in the line.
-  std::string str;
-  getline(in, str);
-  std::istringstream iss(str);
-  SymbolT symbol;
-
-  // Read in lhs.
-  iss >> symbol;
-  if (in.bad())
-  {
-    in.setstate(std::ios_base::badbit);
-    return in;
-  }
-  else
-    item.lhs = symbol;
-
-  // Read in the "->".
-  iss >> str;
-  if (std::string("->") != str)
-  {
-    in.setstate(std::ios_base::badbit);
-    return in;
-  }
-
-  // Read in rhs.
-  for (int i = 0 ; iss.good() ; ++i)
-  {
-    iss >> str;
-    if (std::string("*") == str)
-      item.place = i--;
-    else
-    {
-      item.rhs.push_back(stringToSymbol(str));
-    }
-  }
-  return in;
-}
-
-#elif RI_IO_FORMAT == bracketed
 
 // Print the Rule to the given stream.
 std::ostream & operator<< (std::ostream & out, Rule const & rule)
@@ -233,7 +154,7 @@ std::ostream & operator<< (std::ostream & out, Item const & item)
   }
 
   // The * to repersent place.
-  out << " *"
+  out << " *";
 
   // The remaining rhs symbols.
   for ( ; index < item.cr() ; ++index)
@@ -253,25 +174,26 @@ std::istream & operator>> (std::istream & in, Rule & rule)
   Rule tmp;
 
   // Get lhs & opening bracket.
-  in >> lhs;
+  in >> tmp.lhs;
   IN_ABORT
-  in >> '(';
+  char chCatch;
+  in >> chCatch;
   IN_ABORT
 
+  std::string str;
   do {
     // Read the next word in.
-    std::string str;
     in >> str;
     IN_ABORT
 
     // Check for a special symbol.
     if (str == ")")
-    {}
+      break;
     // Add a symbol to the rhs.
     else
       tmp.rhs.push_back(stringToSymbol(str));
 
-  } while (str != ")")
+  } while (str != ")");
 
   rule = tmp;
   return in;
@@ -283,23 +205,24 @@ std::istream & operator>> (std::istream & in, Item & item)
   Item tmp;
 
   // Get lhs & opening bracket.
-  in >> lhs;
+  in >> tmp.lhs;
   IN_ABORT
-  in >> '(';
+  char chCatch;
+  in >> chCatch;
   IN_ABORT
 
   // Track how many symbols we have read in.
   size_t curI = 0;
 
+  std::string str;
   do {
     // Read the next word in.
-    std::string str;
     in >> str;
     IN_ABORT
 
     // Check for a special symbol.
     if (str == ")")
-    {}
+      break;
     else if (str == "*")
       tmp.place = curI;
     // Add a symbol to the rhs.
@@ -307,12 +230,10 @@ std::istream & operator>> (std::istream & in, Item & item)
       tmp.rhs.push_back(stringToSymbol(str));
 
     ++curI;
-  } while (str != ")")
+  } while (str != ")");
 
   item = tmp;
   return in;
 }
 
 #undef IN_ABORT
-
-#endif

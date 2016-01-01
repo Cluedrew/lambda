@@ -128,21 +128,21 @@ std::ostream & operator<< (std::ostream & out, CFGrammer const & cfg)
   out << cfg.terminals.size() << std::endl;
   for (std::set<SymbolT>::const_iterator it = cfg.terminals.cbegin() ;
        it != cfg.terminals.cend() ; ++it)
-    out << *it << std::endl;
+    out << *it << '\n';
 
   // NonTerminal Symbols
   out << cfg.nonTerminals.size() << std::endl;
   for (std::set<SymbolT>::const_iterator it = cfg.nonTerminals.cbegin() ;
        it != cfg.nonTerminals.cend() ; ++it)
-    out << *it << std::endl;
+    out << *it << '\n';
 
   // Start Symbol
-  out << cfg.start << std::endl;
+  out << cfg.start << '\n';
 
   // Production Rules
   out << cfg.rules.size() << std::endl;
   for (unsigned int i = 0 ; i < cfg.rules.size() ; ++i)
-    out << cfg.rules[i];
+    out << cfg.rules[i] << '\n';
 
   return out;
 }
