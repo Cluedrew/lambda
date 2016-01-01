@@ -82,9 +82,7 @@ std::ostream & operator<< (std::ostream &, Item const &);
  *   refrence to the Rule or Item to be printed.
  * Effect: Characters sent to stream buffer.
  * Return: A reference to the stream printed to.
- * Format: Prints lhs " ->" followed by " " rhs[n] for n=0...cr().
- *   For Item is n= place " * " rhs[n] is printed instead. There is a
- *   tailing newline.
+ * Format: See Rule/Item Format
  */
 
 std::istream & operator>> (std::istream &, Rule &);
@@ -95,9 +93,15 @@ std::istream & operator>> (std::istream &, Item &);
  * Effect: Stream is read from, value in the container will be updated and
  *   on error stream's badbit is set.
  * Return: A reference to the stream provided.
- * Format: LHS -> RHS[0] RHS[1] RHS[2] ...
- *   For items " * RHS[place]" replaces " RHS[place]". Both have a tailing
- *   newline that is read in.
+ * Format: See Rule/Item Format
+ */
+
+/* Rule/Item Format:
+ *   LHS ( RHS[0] ... )
+ * Where LHS and RHS[i] are all SymbolT. Also note that Items have a star (*)
+ * before RHS[place], if place = N than the star is between the last symbol
+ * and the ')'. All symbols, '(', ')' & '*' should all be seperated by white
+ * space.
  */
 
 #endif//RULE_ITEM_HPP
