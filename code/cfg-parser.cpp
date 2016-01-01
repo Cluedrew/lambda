@@ -3,6 +3,8 @@
 // Implementation of the CFGParser.
 
 #include <iostream>
+#include <utility>
+#include <list>
 #include "parse-node.hpp"
 #include "token.hpp"
 
@@ -32,7 +34,13 @@ struct CFGStack
 
   // Push a new TransT_ StateT_ pair onto the stack.
   void push (TransT_ by, StateT_ to)
-  { stack.push(make_pair<TransT_, StateT_>(by, to); }
+  {
+    stack.push(make_pair<TransT_, StateT_>(by, to));
+  }
+  void push (std::pair<TransT_, StateT_> pair)
+  {
+    stack.push(pair);
+  }
 
   // Cull the top item from the stack.
   void cull ()
@@ -68,6 +76,8 @@ struct CFGStack
     return stack.size();
   }
 };
+
+
 
 // The look ahead, a 'prefex' of the TokenStream the parser reads from.
 class LookAhead
@@ -119,13 +129,78 @@ public:
 
 // ===========================================================================
 // Constructors and Deconstructor ============================================
-CFGParser::CFGParser (ActionTable) : {}
-CFGParser::CFGParser (StateMachine) : {}
-CFGParser::CFGParser (std::vector<Rules>) : {}
+CFGParser::CFGParser (CFGrammer const & grammer,
+                      ActionTable const & actionTable) :
+  grammer(grammer), actions(actionTable)
+{}
 
 CFGParser::~CFGParser () {}
 
+
+
 // Implementation Functions ==================================================
+
+static ParseNode * preformReduce
+    (CFGStack<StateT, ParseNode *> & stack, Rule const & rule)
+/* This hidden helper prefroms a reduction, taking an Symbols off the _stack_
+ * to match the rhs of _rule_ and producing the lhs of rule, made from the
+ * fustion of the removed nodes.
+ * Return: New node, caller must free. NULL on error.
+ */
+{
+  // Make sure there are enough symbols.
+  if (stack.size() >= rule.cr())
+  {
+    // Now pop, the top cr() symbols to be the children of the new nodes.
+    std::list<std::pair<ParseNode *, StateT> > children;
+    for (unsigned int i = 0 ; i < rule.cr() ; ++i)
+      children.push_front(stack.pop());
+
+    // Preform a check of all items.
+    bool passing = true;
+    for (std::list<std::pair<ParseNode *, StateT> >::const_iterator it
+         = children.begin() ; it != children.end() ; ++it)
+      if (rule.rhs[i] != it->second->getHead())
+      {
+        std::cerr << "REDUCE ERROR: Symbol mismatch, expected " <<
+            rule.rhs[i] << " found " << it->second->getHead() << '.'
+            << std::endl;
+        passing = false;
+      }
+
+    if (passing)
+    {
+      // Convert the list of pairs to a vector of ptrs.
+      std::vector<ParseNode*> childPtrs;
+      while (!children.empty())
+      {
+        childPtrs.push_back(children.back());
+        children.pop_back();
+      }
+
+      // Create a new ParseNode and return it.
+      return new ParseNode(rule.lhs, childPtrs);
+    }
+    else
+    {
+      // To avoid memory loss push the items back on the stack.
+      while (!children.empty())
+      {
+        stack.push(children.front());
+        children.pop_front();
+      }
+      return NULL;
+    }
+  }
+  // Otherwise print an error message and quit.
+  else
+  {
+    std::cerr << "REDUCE ERROR: Not enough symbols on the stack ("
+        << stack.size() << '/' << ")." << std::endl;
+    return NULL;
+  }
+}
+
 // Parse a series or stream of tokens, producing a parse tree.
 ParseNode * CFGParser::parse (std::vector<Token> const & tokens)
 {
@@ -137,20 +212,20 @@ ParseNode * CFGParser::parse (std::vector<Token> const & tokens)
 // Parse a series or stream of tokens, producing a parse tree.
 ParseNode * CFGParser::parse (TokenStream const & tokens)
 {
-  // Set-Up ------------------------------------------------------------------
+  // === Set-Up ===
   // The stack of states and transitions.
   CFGStack<StateT,ParseNode*> stack;
 
   // The lookAhead stack, unproccessed symbols from the stream.
   LookAhead lookAhead(tokens);
 
-  // Determain the Next Action -----------------------------------------------
+  // === Determain the Next Action ===
   bool looping = true;
   do {
     // Look-Up the current action.
     SROp curOp = actions.getOp(stack.peekState(), lookAhead.peekSymbol())
 
-    // Preform the Currant Action --------------------------------------------
+    // === Preform the Currant Action ===
     switch (curOp.getType())
     {
     // Shift Action
@@ -190,7 +265,7 @@ ParseNode * CFGParser::parse (TokenStream const & tokens)
   // Now exit if we are done.
   while (!curOp.isDone());
 
-  // Clean-Up ----------------------------------------------------------------
+  // === Clean-Up ===
   // Any final checks, free extra memory and return.
 
   // If there is exactly one item on the stack and the look ahead is eof ...

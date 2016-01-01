@@ -8,22 +8,25 @@
 
 #include <vector>
 #include "action-table.hpp"
+#include "cfgrammer.hpp"
 class ParseNode;
 class Token;
 
 class CFGParser
 {
 private:
+  CFGrammer grammer;
   ActionTable actions;
 
 protected:
 public:
-  CFGParser (ActionTable const &);
+  CFGParser (CFGrammer const &, ActionTable const &);
   /* Create a parser from the ActionTable that speifies its actions.
-   * Params: A constant reference to an ActionTable, which is copied.
+   * Params: A constant reference to a CFGrammer and an ActionTable,
+   *   which are copied.
    */
 
-  virtual ~GFGParser ();
+  virtual ~CFGParser ();
 
   ParseNode * parse (std::vector<Token> const &);
   ParseNode * parse (TokenStream const &);
