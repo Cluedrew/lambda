@@ -2,8 +2,11 @@
 
 // Implementation of the CFGParser.
 
+#include <iostream>
 #include "parse-node.hpp"
 #include "token.hpp"
+
+
 
 // Helper Classes ============================================================
 // Just little bundles of short-cuts.
@@ -12,8 +15,15 @@
 template<typename StateT_, typename TransT_>
 struct CFGStack
 {
+  // The first state, before the stack even starts.
+  StateT_ startState;
+
   // The stack alternates between TransT_ and StateT_.
   std::stack<std::pair<TransT_, StateT_> stack;
+
+  CFGStack(StateT_ start) :
+    stateState(start), stack()
+  {}
 
   // Check to see if the stack is empty.
   // Later functions only work when this is not true.
@@ -28,10 +38,35 @@ struct CFGStack
   void cull ()
   { stack.pop(); }
 
+  // Pop the top item from the stack.
+  std::pair<TransT_, StateT_> pop ()
+  {
+    std::pair<TransT_, StateT_> tmp = stack.top();
+    stack.pop();
+    return tmp;
+  }
+
   // Peek at the last Transition used.
-  TransT_ peekTrans () { return stack.top().first; }
+  // Don't call when the stack is empty.
+  TransT_ peekTrans ()
+  {
+    return stack.top().first;
+  }
+
   // Peek at the last/currant State.
-  StateT_ peekState () { return stack.top().second; }
+  StateT_ peekState ()
+  {
+    if (stack.empty())
+      return startState;
+    else
+      return stack.top().second;
+  }
+
+  // Get the number of items on the stack (counting TransT_)
+  size_t size ()
+  {
+    return stack.size();
+  }
 };
 
 // The look ahead, a 'prefex' of the TokenStream the parser reads from.
@@ -46,7 +81,7 @@ private:
   TokenStream & tokStream;
 
   // Min-fill: If we are looking for a symbol and there isn't one in the
-  // stack
+  // stack, add one to the stack built from the next token in the stream.
   void minFill ()
   { if (stack.empty()) stack.push(ParseNode(tokStream.next())); }
 
@@ -59,20 +94,28 @@ public:
 
   // Look at the symbol (head of node) on the top of the stack.
   SymbolT peekSymbol ()
-  { return stack.top().getHead(); }
+  {
+    minFill();
+    return stack.top().getHead();
+  }
 
   // Push a new node onto the stack.
   void pushNode (ParseNode node)
-  { stack.push(node); }
+  {
+    stack.push(node);
+  }
 
   // Pop the node from the stack.
   ParseNode popNode ()
   {
+    minFill();
     ParseNode node(stack.top());
     stack.pop();
     return node;
   }
 }
+
+
 
 // ===========================================================================
 // Constructors and Deconstructor ============================================
@@ -96,25 +139,75 @@ ParseNode * CFGParser::parse (TokenStream const & tokens)
 {
   // Set-Up ------------------------------------------------------------------
   // The stack of states and transitions.
-  CFGStack<int,Token> stack;
+  CFGStack<StateT,ParseNode*> stack;
 
   // The lookAhead stack, unproccessed symbols from the stream.
-  LookAhead lookAhead (tokens);
+  LookAhead lookAhead(tokens);
 
   // Determain the Next Action -----------------------------------------------
-  while (/* Stream is not empty and eof not reached */)
-  {
+  bool looping = true;
+  do {
+    // Look-Up the current action.
+    SROp curOp = actions.getOp(stack.peekState(), lookAhead.peekSymbol())
 
     // Preform the Currant Action --------------------------------------------
+    switch (curOp.getType())
+    {
     // Shift Action
-    if ()
-    {}
+    case SROp::shift:
+      // Move the look ahead token/symbol to the stack and change states.
+      stack.push(lookAhead.popNode(), curOp.getDest())
+      break;
+
     // Reduce Action
-    else
-    {}
-    // Done Action?
+    case SROp::reduce:
+      // Get the rule, unwind the stack, create a new symbol and put it in the
+      // look ahead.
+      // I think a helper function ...(stack,rule) would do nicely.
+      !
+      break;
+
+    // Done Action
+    case SROp::done:
+      // Quite simple: we are done so stop looping.
+      looping = false;
+      break;
+
+    // Error Action
+    case SROp::error:
+      // Print an error message and return.
+      std::cerr << "PARSE ERROR: Error Operation at: (" << stack.peekState()
+          << ", " << lookAhead.peekSymbol << ") reads: " << curOp.getMsg()
+          << std::endl;
+      return NULL;
+
+    // default shouldn't occur.
+    default:
+      std::cerr << "PARSE ERROR: Bad Operation type." << std::endl;
+      return NULL;
+    }
   }
+  // Now exit if we are done.
+  while (!curOp.isDone());
 
   // Clean-Up ----------------------------------------------------------------
   // Any final checks, free extra memory and return.
+
+  // If there is exactly one item on the stack and the look ahead is eof ...
+  if (1 == stack.size() && getEofSymbol() == lookAhead.peekSymbol())
+    // ... than parsing was a success, return the parse tree.
+    return stack.peekTrans();
+  else
+  {
+    // Otherwise clean up the extra nodes.
+    std::cerr << "PARSE ERROR: Bad end state. Had '" << stack.size() <<
+        "' items on the stack and '" << lookAhead.peekSymbol() <<
+        "' is the last symbol." << std::endl;
+    while (stack.isEmpty())
+    {
+      delete stack.peekTrans();
+      stack.cull();
+    }
+    return NULL;
+  }
 }

@@ -72,6 +72,16 @@ unsigned int SROp::getRule () const
   return value;
 }
 
+// Get the error message from the error operation.
+std::string SROp::getMsg () const
+{
+  if (error != type)
+    throw std::logic_error("SROp: getMsg: operation not an error");
+
+  // Currently there is only one error message.
+  return std::string("Undefined Error");
+}
+
 // Input and Output Operators ================================================
 std::string const shiftStr("shift");
 std::string const reduceStr("reduce");

@@ -53,8 +53,9 @@ SROp ActionTable::getOp (StateT state, SymbolT symbol) const
 {
   // Check to make sure one is defined, return it if it exists.
   if (!hasOp(state, symbol))
-    throw std::invalid_argument("ActionTable: cannot getOp for undefined Op");
-  return data.find(std::make_pair(state, symbol))->second;
+    return SROp::errorOp();
+  else
+    return data.find(std::make_pair(state, symbol))->second;
 }
 
 // Set the operation for a given state and lookahead symbol.

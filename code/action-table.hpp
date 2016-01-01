@@ -51,9 +51,8 @@ public:
   SROp getOp (StateT, SymbolT) const;
   /* Get the SROp for a given state
    * Params: The StateT and SymbolT lookup for an SROp.
-   * Return: A copy of the SROp.
-   * Except: Throws std::invalid_argument if the requested SROp does not
-   *   exist.
+   * Return: A copy of the SROp, or the default error operation if the SROp
+   *   does not exist.
    */
 
   void setOp (StateT, SymbolT, SROp);

@@ -21,6 +21,7 @@
  */
 
 #include <iosfwd>
+#include <string>
 #include "parse-fwd.hpp"
 
 struct SROp
@@ -79,6 +80,12 @@ struct SROp
   /* Get the rule used in the reduction.
    * Return: The rule number that is used in this reduction.
    * Except: Throws std::logic_error if this is not a reduce operation.
+   */
+
+  std::string getMsg () const;
+  /* Get the error message from the error operation.
+   * Return: A copy of the error message as string object.
+   * Except: Throws std::logic_error if this is not an error operation.
    */
 
   SROp (); // Default constructor creates an error op.

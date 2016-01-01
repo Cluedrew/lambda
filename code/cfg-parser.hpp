@@ -28,8 +28,8 @@ public:
   ParseNode * parse (std::vector<Token> const &);
   ParseNode * parse (TokenStream const &);
   /* Parse a series or stream of tokens, producing a parse tree.
-   * Params:
-   * Effect: void?
+   * Params: A TokenStream to read from.
+   * Effect: (stream only) Reads all tokens from the stream.
    * Return: A pointer to the ParseNode at the root of the parse tree, caller
    *   must free.
    */
