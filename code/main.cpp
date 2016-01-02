@@ -60,7 +60,11 @@ ActionTable readActionTableFromFile (char const * fileName)
 
 int main (int argc, char * argv[])
 {
-  // Next Step, get a parser and parse with it.
+  // Get the parser.
+  CFGParser parser(readGrammerFromFile("lang.cfg"),
+                   readActionTableFromFile("lang.sr"));
+
+  //
 
   return 0;
 }

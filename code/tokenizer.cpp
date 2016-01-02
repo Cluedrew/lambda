@@ -35,6 +35,8 @@ std::vector<Token> Tokenizer::mass (std::vector<char> const & chs)
   return tokens;
 }
 
+
+
 // ===========================================================================
 /* TokenStreamCore ===========================================================
  * Pointer to Implementation, this class holds the secret data for TokenStream
@@ -70,8 +72,39 @@ public:
 
   virtual ~TokStrVectorWrapper () {}
 
-  Token next (){ return (cur == end) ? TokenStreamCore::eofToken : *(cur++); }
+  Token next ()
+  {
+    return (cur == end) ? TokenStreamCore::eofToken : *(cur++);
+  }
 };
+
+
+
+// Character Stream => Token Stream
+class CharToTokenStream
+{
+private:
+  std::istream & in;
+
+protected:
+public:
+  CharToTokenStream (std::istream & inputStream) :
+      in(inputStream)
+  {}
+
+  virtual ~CharToTokenStream () {}
+
+  // Get the next Token.
+  Token next ()
+  {
+    if (in.eof())
+      return TokenStreamCore::eofToken;
+    else
+    {
+      // Get a single
+    }
+  }
+}
 
 // ===========================================================================
 // TokenStream ===============================================================
