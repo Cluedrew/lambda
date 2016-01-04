@@ -7,11 +7,12 @@
  */
 
 #include <vector>
+#include <iosfwd>
 #include "action-table.hpp"
 #include "cfgrammer.hpp"
 class ParseNode;
 class Token;
-class TokenStream;
+class Tokenizer;
 
 class CFGParser
 {
@@ -29,13 +30,24 @@ public:
 
   virtual ~CFGParser ();
 
-  ParseNode * parse (std::vector<Token> const &);
-  ParseNode * parse (TokenStream &);
-  /* Parse a series or stream of tokens, producing a parse tree.
-   * Params: A TokenStream to read from.
-   * Effect: (stream only) Reads all tokens from the stream.
+  ParseNode * parse (Tokenizer &);
+  /* Parse a stream of tokens from a Tokenizer producing a parse tree.
+   * Params: A Tokenizer to read from.
+   * Effect: Reads all tokens from the stream until a done op is found.
    * Return: A pointer to the ParseNode at the root of the parse tree, caller
    *   must free.
+   */
+
+  void printInternal (std::ostream &) const;
+  /* Print the CFGrammer and ActionTable within the Parser to a stream.
+   * Params: An output stream to print to.
+   * Effect: Prints to stream.
+   * Format:
+   *   PARSER: CFGrammer
+   *   <The cf grammer>
+   *   PARSER: ActionTable
+   *   <The action table>
+   *   PARSER: end
    */
 };
 

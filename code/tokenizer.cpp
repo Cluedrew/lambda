@@ -6,130 +6,77 @@
 #include "token.hpp"
 #include "symbol.hpp"
 
+Token const eofToken = Token{getEofSymbol(), '\0'};
+
+
 // ===========================================================================
 // Tokenizer =================================================================
 
-// Mass tokenization, transform the entire vector into tokens.
-std::vector<Token> Tokenizer::mass (std::vector<char> const & chs)
+// Create a Tokenizer that reads from the stream as it needs to.
+Tokenizer::Tokenizer (std::istream & in) :
+  input(in)
+{}
+
+// Deconstructor
+Tokenizer::~Tokenizer ()
+{}
+
+
+
+// Get the next token in tokenization.
+Token Tokenizer::next()
+{
+  // If we are already reached the end of output return the eof.
+  if (input.eof())
+  {
+    // Search forward for the next token.
+    do {
+      // Get the next character.
+      char ch;
+      input.get(ch);
+
+      // Check to see if it forms a token.
+      if (ch == '.')
+        return Token{SymbolT::dot, '.'};
+      else if (ch == '(')
+        return Token{SymbolT::openApp, '('};
+      else if (ch == ')')
+        return Token{SymbolT::closeApp, ')'};
+      else if ('a' <= ch && ch <= 'z')
+        return Token{SymbolT::variable, ch};
+
+    } while (!input.eof());
+  }
+
+  // If we reached the end of input produce the eofToken.
+  return eofToken;
+}
+
+// Mass tokenization, transform the entire stream into tokens.
+std::vector<Token> Tokenizer::mass (std::istream & in)
 {
   std::vector<Token> tokens;
-  unsigned int n = chs.size();
-  for (unsigned int i = 0 ; i < n ; ++i)
+  Tokenizer internal(in);
+  Token nextToken;
+
+  while (eofToken != (nextToken = internal.next()) )
   {
-    switch (chs[i])
-    {
-    case '.':
-      tokens.push_back(Token{SymbolT::dot, '.'});
-      break;
-    case '(':
-      tokens.push_back(Token{SymbolT::openApp, '('});
-      break;
-    case ')':
-      tokens.push_back(Token{SymbolT::closeApp, ')'});
-      break;
-    default:
-      if ('a' <= chs[i] && chs[i] <= 'z')
-        tokens.push_back(Token{SymbolT::variable, chs[i]});
-    }
+    tokens.push_back(nextToken);
   }
+
   return tokens;
 }
 
 
 
-// ===========================================================================
-/* TokenStreamCore ===========================================================
- * Pointer to Implementation, this class holds the secret data for TokenStream
- * as well as the situational implementations. All it really does is wrap up a
- * class hierarcy in TokenStream so I don't have to worry about it from the
- * outside.
- */
-
-// The main class at the head of the hierarcy, abstract/pure virtual.
-struct TokenStreamCore
-{
-  TokenStreamCore ();
-  virtual ~TokenStreamCore () {}
-  virtual Token next () =0;
-  static Token const eofToken;
-};
-
-// A copy of the eof token for easy access and retrival.
-Token const TokenStreamCore::eofToken = Token{getEofSymbol(), '\0'};
-
-// Turns a vector into a stream.
-class TokStrVectorWrapper
-{
-private:
-  std::vector<Token> tokens;
-  std::vector<Token>::iterator cur;
-  std::vector<Token>::iterator end;
-protected:
-public:
-  TokStrVectorWrapper (std::vector<Token> const & vec) :
-      tokens(vec), cur(tokens.begin()), end(tokens.end())
-  {}
-
-  virtual ~TokStrVectorWrapper () {}
-
-  Token next ()
-  {
-    return (cur == end) ? TokenStreamCore::eofToken : *(cur++);
-  }
-};
-
-
-
-// Character Stream => Token Stream
-class CharToTokenStream
-{
-private:
-  std::istream & in;
-
-protected:
-public:
-  CharToTokenStream (std::istream & inputStream) :
-      in(inputStream)
-  {}
-
-  virtual ~CharToTokenStream () {}
-
-  // Get the next Token.
-  Token next ()
-  {
-    if (in.eof())
-      return TokenStreamCore::eofToken;
-    else
-    {
-      // Get a single
-    }
-  }
-}
-
-// ===========================================================================
-// TokenStream ===============================================================
-
 // Disabled Functions
-TokenStream::TokenStream (TokenStream const & other)
-{ exit(EXIT_FAILURE); }
-TokenStream & TokenStream::operator= (TokenStream const & other)
-{ exit(EXIT_FAILURE); return *this; }
-
-// Constrctors and Deconstructor =============================================
-//TokenStream::TokenStream (Tokenizer const & tokenizer,
-//                          /*Some sort of character stream*/) :
-//  heart(...)
-//{}
-
-// Create a TokenStream from a vector of tokens.
-TokenStream::TokenStream (std::vector<Token> const & vec) :
-  heart((TokenStreamCore*)new TokStrVectorWrapper(vec))
-{}
-
-// Deconstructor:
-TokenStream::~TokenStream ()
-{ delete heart; }
-
-// Get the next Token from the stream.
-Token TokenStream::next ()
-{ return heart->next(); }
+Tokenizer::Tokenizer (Tokenizer const & other) :
+  input(other.input)
+{
+  exit(EXIT_FAILURE);
+}
+Tokenizer & Tokenizer::operator= (Tokenizer const & other)
+{
+  exit(EXIT_FAILURE);
+  return *this;
+}

@@ -83,7 +83,7 @@ struct CFGStack
 
 
 
-// The look ahead, a 'prefex' of the TokenStream the parser reads from.
+// The look ahead, a 'prefex' of the Token stream the parser reads from.
 class LookAhead
 {
 private:
@@ -91,19 +91,19 @@ private:
   // ParseNodes. This includes those we pushed into the stream.
   std::stack<ParseNode*> stack;
 
-  // The TokenStream the look ahead is filled from.
-  TokenStream & tokStream;
+  // The Tokenizer stream the look ahead is filled from.
+  Tokenizer & tokenizer;
 
   // Min-fill: If we are looking for a symbol and there isn't one in the
   // stack, add one to the stack built from the next token in the stream.
   void minFill ()
-  { if (stack.empty()) stack.push(new ParseNode(tokStream.next())); }
+  { if (stack.empty()) stack.push(new ParseNode(tokenizer.next())); }
 
 protected:
 public:
   // Create a token stream
-  LookAhead (TokenStream & ts) :
-    stack(), tokStream(ts)
+  LookAhead (Tokenizer & ts) :
+    stack(), tokenizer(ts)
   {}
 
   // Look at the symbol (head of node) on the top of the stack.
@@ -123,7 +123,7 @@ public:
   ParseNode * popNode ()
   {
     minFill();
-    ParseNode * node(stack.top());
+    ParseNode * node = stack.top();
     stack.pop();
     return node;
   }
@@ -235,15 +235,7 @@ static ParseNode * preformReduce (CFGStack & stack, Rule const & rule)
 
 
 // Parse a series or stream of tokens, producing a parse tree.
-ParseNode * CFGParser::parse (std::vector<Token> const & tokens)
-{
-  // This one just creates a TokenStream and passes it to its partner
-  TokenStream tokStream(tokens);
-  return parse (tokStream);
-}
-
-// Parse a series or stream of tokens, producing a parse tree.
-ParseNode * CFGParser::parse (TokenStream & tokens)
+ParseNode * CFGParser::parse (Tokenizer & tokens)
 {
   // === Set-Up ===
   // The stack of states and transitions, given the starting state.
@@ -320,4 +312,13 @@ ParseNode * CFGParser::parse (TokenStream & tokens)
     }
     return NULL;
   }
+}
+
+
+
+// Print the CFGrammer and ActionTable within the Parser to a stream.
+void CFGParser::printInternal (std::ostream & out) const
+{
+  out << "PARSER: CFGrammer\n" << grammer << "PARSER: ActionTable\n"
+      << actions << "PARSER: end\n";
 }

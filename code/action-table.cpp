@@ -105,10 +105,12 @@ std::ostream & operator<< (std::ostream & out, ActionTable const & at)
 // Read an ActionTable from a stream.
 std::istream & operator>> (std::istream & in, ActionTable & at)
 {
-  // Local Storage variables.
+  // Temperary storage.
   StateT state;
   SymbolT symbol;
   SROp op;
+
+  // Input variables.
   std::string line;
   std::istringstream iss;
   int n;
@@ -118,16 +120,22 @@ std::istream & operator>> (std::istream & in, ActionTable & at)
   iss.str(line);
   iss >> n;
 
+  std::cerr << ':' << n << std::endl;
+
   // Get all the operations.
-  for (int i = 0 ; i < n && in.good() ; ++i)
+  for (int i = 0 ; i < n ; ++i)
   {
+    // Read in the next operation
     getline(in, line);
     iss.str(line);
     iss >> state >> symbol >> op;
-    if (in.bad())
-      break;
-    else
-      at.data.insert(std::make_pair(std::make_pair(state, symbol), op));
+    at.data.insert(std::make_pair(std::make_pair(state, symbol), op));
+    std::cerr << "(<" << state << '-' << symbol << '>'
+        << op << ')' << std::endl;
   }
+
+
+  if (in.bad())
+    std::cerr << "ERROR: Reading of Action Table failed." << std::endl;
   return in;
 }

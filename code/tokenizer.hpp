@@ -13,22 +13,23 @@
  *    maybe something with std::regex (or my own with StateMachine).
  * 3. I can drop some of the old formats, I think std::istream and
  *    std::string should be enough input ways.
+ *
+ * Tokenizer works with istreams, use an istringstream wrapper if need be.
  */
 
 #include <vector>
 #include <string>
+#include <istream>
 class Token;
-class TokenStreamCore;
 
 class Tokenizer
 {
-private:
-protected:
 public:
+  // static function preform 'instant' tokenization.
 
-  static std::vector<Token> mass (std::vector<char> const &);
-  /* Mass tokenization, transform the entire vector into tokens.
-   * Params: A vector of input characters.
+  static std::vector<Token> mass (std::istream &);
+  /* Mass tokenization, transform the entire stream into tokens.
+   * Params: A stream of input characters.
    * Return: A vector of tokens.
    */
 
@@ -36,36 +37,28 @@ public:
   /* Convert
    */
 
-  //static std::vector<Token> operator() (std::string);
-  //static std::vector<Token> operator() (char const *);
-};
-
-class TokenStream
-{
 private:
-  // Pointer to Implementation
-  TokenStreamCore * heart;
-
   // Non-copyable
-  TokenStream (TokenStream const &);
-  TokenStream & operator= (TokenStream const &);
+  Tokenizer (Tokenizer const &);
+  Tokenizer & operator= (Tokenizer const &);
+
+  // Input stream for each instance.
+  std::istream & input;
+
 protected:
 public:
-  //TokenStream (Tokenizer const &, /*Some sort of character stream*/);
-
-  TokenStream (std::vector<Token> const &);
-  /* Create a TokenStream from a vector of tokens.
-   * Params: A vector of Tokens containing all the tokens to be produced by
-   *   the stream in order.
+  Tokenizer (std::istream &);
+  /* Create a Tokenizer that reads from the stream as it needs to.
+   * Params: An input stream to read characters from.
    */
 
-  virtual ~TokenStream ();
+  virtual ~Tokenizer ();
 
-  Token next ();
-  /* Get the next Token from the stream. If all tokens have been read a
-   *   special EOF token is returned instead.
-   * Effect: Advances along the end of the stream.
-   * Return: A new Token.
+  Token next();
+  /* Get the next token in tokenization.
+   * Effect: Reads from the stream far enough to find the next token.
+   * Return: A new Token. If a the end of the stream has been reached than
+   *   the eof Token is returned.
    */
 };
 

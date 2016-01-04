@@ -19,4 +19,17 @@ struct Token
   TextT text;
 };
 
+
+
+// Operator definitions.
+inline bool operator== (Token t1, Token t2)
+{
+  return (t1.kind == t2.kind) && (t1.text == t2.text);
+}
+
+inline bool operator!= (Token t1, Token t2)
+{
+  return (t1.kind != t2.kind) || (t1.text != t2.text);
+}
+
 #endif//TOKEN_HPP

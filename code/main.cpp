@@ -10,6 +10,7 @@
 #include "slr1-atg.hpp"
 #include "action-table.hpp"
 #include "cfg-parser.hpp"
+#include "parse-node.hpp"
 
 // Given a file name, return a CFG read from it.
 CFGrammer readCFGFromFile (char const * fileName)
@@ -58,13 +59,24 @@ ActionTable readActionTableFromFile (char const * fileName)
 }
 
 
+
 int main (int argc, char * argv[])
 {
   // Get the parser.
-  CFGParser parser(readGrammerFromFile("lang.cfg"),
+  CFGParser parser(readCFGFromFile("lang.cfg"),
                    readActionTableFromFile("lang.sr"));
 
-  //
+  parser.printInternal(std::cout);
+
+  // Prepare a Tokenizer
+  std::ifstream inputFile("test.l");
+  Tokenizer tokenStream(inputFile);
+
+  // Parse the file.
+  //ParseNode * parseRootNode = parser.parse(tokenStream);
+
+  // Free the parse tree.
+  //delete parseRootNode;
 
   return 0;
 }
