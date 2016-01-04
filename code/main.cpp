@@ -73,10 +73,10 @@ int main (int argc, char * argv[])
   Tokenizer tokenStream(inputFile);
 
   // Parse the file.
-  //ParseNode * parseRootNode = parser.parse(tokenStream);
+  ParseNode * parseRootNode = parser.parse(tokenStream);
 
   // Free the parse tree.
-  //delete parseRootNode;
+  delete parseRootNode;
 
   return 0;
 }

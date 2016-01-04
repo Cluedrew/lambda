@@ -9,8 +9,7 @@
 #include <sstream>
 #include "symbol.hpp"
 
-// ===========================================================================
-// ActionTable ===============================================================
+
 
 // Constructors and Deconstructor ============================================
 // Create an unfilled ActionTable.
@@ -120,18 +119,14 @@ std::istream & operator>> (std::istream & in, ActionTable & at)
   iss.str(line);
   iss >> n;
 
-  std::cerr << ':' << n << std::endl;
-
   // Get all the operations.
   for (int i = 0 ; i < n ; ++i)
   {
     // Read in the next operation
     getline(in, line);
-    iss.str(line);
-    iss >> state >> symbol >> op;
+    std::istringstream lineStream(line);
+    lineStream >> state >> symbol >> op;
     at.data.insert(std::make_pair(std::make_pair(state, symbol), op));
-    std::cerr << "(<" << state << '-' << symbol << '>'
-        << op << ')' << std::endl;
   }
 
 
