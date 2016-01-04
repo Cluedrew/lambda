@@ -13,7 +13,6 @@
 #include <ostream>
 #include <vector>
 #include "parse-fwd.hpp"
-class ParseNode;
 class SubstutionOp;
 
 struct Element
@@ -126,5 +125,13 @@ struct Element
    * Return: A reference to the provided ostream.
    */
 };
+
+Element * parseNodeToElement (ParseNode const *);
+/* Build an Element from a ParseNode.
+ * Params: A pointer to the ParseNode.
+ * Effect: Allocates a new Element (and any sub-Elements).
+ * Return: A pointer to the new Element, caller must free.
+ * Except: Throws std::invalid_argument if the conversion can't be made.
+ */
 
 #endif//ELEMENT_HPP

@@ -284,3 +284,63 @@ std::ostream & Element::write (std::ostream & out) const
     return out << var.id;
   }
 }
+
+
+
+// Build an Element from a ParseNode.
+Element * parseNodeToElement (ParseNode const * node)
+{
+  // First a basic check.
+  if (SymbolEnum::ELEMENT != node->getHead())
+    throw std::invalid_argument("parseNodeToElement: node not an ELEMENT.");
+  // Otherwise make the approprate node.
+  else
+    return new Element(node);
+/*
+  ParseNode const * cNode = node->child(0);
+   if (SymbolEnum::variable == cNode->getHead())
+    return new VariableElement(cNode);
+  else if (SymbolEnum::FUNCTION == cNode->getHead())
+    return new FunctionElement(cNode);
+  else if (SymbolEnum::APPLICATION == cNode->getHead())
+    return new ApplicationElement(cNode);
+  else
+    throw std::invalid_argument("");
+*/
+}
+
+#if 0
+// Should I switch the implementation over?
+// I am basically just mimicing pointers all the time so the inline space
+// doesn't matter anyways. ...It was an interesting thought experement.
+class VariableElement : public Element
+{}
+class FunctionElement : public Element
+{}
+class ApplicationElement : public Element
+{}
+
+VariableElement::VariableElement (ParseNode const * node) :
+  id()
+{
+  if (SymbolEnum::variable != node->getHead())
+    throw std::invalid_argument("VariableElement: node not a variable.");
+
+  id = node->getText();
+}
+
+FunctionElement::FunctionElement (ParseNode const * node) :
+  head(), body(nullptr)
+{
+  if (SymbolEnum::FUNCTION != node->getHead())
+    throw std::invalid_argument("FunctionElement: node not a FUNCTION.");
+}
+
+ApplicationElement::ApplicationElement (ParseNode const * node) :
+  lhs(nullptr), rhs(nullptr)
+{
+  if (SymbolEnum::APPLICATION != node->getHead())
+    throw std::invalid_argument("VariableElement: node not a variable.");
+}
+
+#endif
