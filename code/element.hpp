@@ -15,75 +15,18 @@
 #include "parse-fwd.hpp"
 class SubstutionOp;
 
-struct Element
+class LambdaElement
 {
-  // Internal Definitions:
-  enum ElementType
-  {
-    function,
-    variable,
-    application
-  };
-
-  struct Variable
-  {
-    TextT id;
-  };
-
-  struct Function
-  {
-    Variable head;
-    Element * body;
-  };
-
-  struct Application
-  {
-    Element * lhs;
-    Element * rhs;
-  };
-
-  // Fields:
-  ElementType type;
-
-  union
-  {
-    Function fun;
-    Variable var;
-    Application app;
-  };
-
-  Element (ParseNode const *);
+  LambdaElement (ParseNode const *);
   /* Create a Element and any sub-Elements from a parse tree.
    * Params: A pointer to the root node of the parse tree.
    */
 
-  Element (TextT);
-  /* Create a variable element.
-   */
-
-  Element (TextT, Element *);
-  /* Create a function element.
-   */
-
-  Element (Element *, Element *);
-  /* Create an application element.
-   */
-
-  Element (Element const &);
+  LambdaElement (LambdaElement const &);
   /* Create a deep copy of an existing element.
    */
 
-  ~Element ();
-
-  // Predicate Functions
-  bool isFunction () const;
-  // Check to see if the element is a function.
-
-  bool isApplication () const;
-  // Check to see if the element is an application.
-
-  bool isVariable () const;
-  // Check to see if the element is a variable.
+  ~LambdaElement () =0;
 
   bool isClosed () const;
   // Check to see if the element is closed.
@@ -95,14 +38,14 @@ struct Element
   // Check to see if the element is an expression.
 
   // Operation Functions
-  Element * evaluate () const;
+  virtual LambdaElement * evaluate () const;
   /* Get the result of an evaluation on the exprestion.
    * Effect:
    * Return:
    * Except:
    */
 
-  Element * apply (Element const & value) const;
+  virtual LambdaElement * apply (Element const & value) const;
   /* Get the result of an application on a function.
    * Params: A constaint reference to the value taken as the argument.
    * Effect:
@@ -110,7 +53,7 @@ struct Element
    * Except:
    */
 
-  Element * substute (SubstutionOp const & subOp) const;
+  virtual LambdaElement * substute (SubstutionOp const & subOp) const;
   /* Get the result of a substution on an element.
    * Params: A constaint reference to the substution to preform.
    * Effect:
@@ -118,7 +61,7 @@ struct Element
    * Except:
    */
 
-  std::ostream & write (std::ostream &) const;
+  virtual std::ostream & write (std::ostream &) const;
   /* Write the element to stream.
    * Params: A reference to an ostream to write to.
    * Effect: Writes to stream.
@@ -133,5 +76,58 @@ Element * parseNodeToElement (ParseNode const *);
  * Return: A pointer to the new Element, caller must free.
  * Except: Throws std::invalid_argument if the conversion can't be made.
  */
+
+class VariableElement : public Element
+{
+private:
+  TextT id;
+public:
+  VariableElement (TextT);
+  VariableElement (ParseNode const *);
+
+  bool isClosed () const;
+  /* Check to see if the element is closed.
+   * Return: False, variables are never closed without context.
+   */
+
+  bool isClosedWith (std::vector<VariableElement const *> bounded) const;
+  /* Check to see if the element is closed within a given context.
+   * Params: A vector of pointers to bound variables.
+   * Return: True if this variable matches one in the bounded vector.
+   */
+
+  LambdaElement * substute (SubstutionOp const & subOp) const;
+  /* Get the result of a substution on an element.
+   * Params: A constaint reference to the substution to preform.
+   * Effect: Allocates a new Element.
+   * Return: A pointer to the resulting Element, caller must free.
+   */
+};
+
+class FunctionElement : public LambdaElement
+{
+  VariableElement head;
+  LambdaElement * body;
+
+public:
+  FunctionElement (ParseNode const *);
+
+  FunctionElement (TextT, LambdaElement *);
+
+  LambdaElement * apply (LambdaElement const *);
+
+  LambdaElement * substute (SubstutionOp const &);
+};
+
+class ApplicationElement : public LambdaElement
+{
+  LambdaElement * lhs;
+  LambdaElement * rhs;
+
+public:
+  ApplicationElement (ParseNode const *);
+
+  // ...
+};
 
 #endif//ELEMENT_HPP
