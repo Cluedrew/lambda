@@ -21,26 +21,202 @@ LambdaElement::LambdaElement ()
 LambdaElement::~LambdaElement ()
 {}
 
-LambdaElement
-LambdaElement
-LambdaElement
+
+
+// Create a new element from the root of a parse tree.
+LambdaElement * LambdaElement::fromParseRoot (ParseNode const * node)
+{
+  // Params: Pointer to a 'INPUT' ParseNode.
+  ! // TODO
+}
+
+// Create a new element from a parse tree.
+LambdaElement * LambdaElement::fromParseTree (ParseNode const * node)
+{
+  // Params: Pointer to a 'ELEMENT' ParseNode.
+  ! // TODO
+}
 
 
 
 // VariableElement ===========================================================
-VariableElement::VariableElement () : {}
+// Create a new element from a parse tree.
+VariableElement::VariableElement (ParseNode const * node) :
+  LambdaElement(), id()
+{
+  ! // TODO
+}
+
+// Manual constructor, create the element from its parts.
 VariableElement::VariableElement (TextT id) :
+  LambdaElement(), id(id)
 {}
 
-VariableElement::~VariableElement ()
+// Clone, create a deep copy.
+LambdaElement * clone ()
+{
+  return new VariableElement(id);
+}
+
+VariableElement::~VariableElement () {}
+
+
+
+// Check to see if the element is closed.
+bool VariableElement::isClosed () const
+{
+  return false;
+}
+
+// Check to see if the element is closed within a given context.
+bool VariableElement::isClosedWith
+    (std::vector<VariableElement const *> bounded) const
+{
+  ! // TODO
+}
+
+// Check to see if the element is an expression.
+bool VariableElement::isExpression () const
+{
+  ! // TODO
+}
+
+
+
+// Get the result of a substution on an element.
+LambdaElement * VariableElement::substute (SubstutionOp const & subOp) const
+{
+  ! // TODO
+}
+
+// Write the element to stream.
+std::ostream & VariableElement::write (std::ostream &) const
+{
+  ! // TODO
+}
 
 
 
 // FunctionElement ===========================================================
+// Create a new element from a parse tree.
+FunctionElement::FunctionElement (ParseNode const * node)
+  LambdaElement(), head(), body(nullptr)
+{
+  ! // TODO
+}
+
+// Manual constructor, create the element from its parts.
+FunctionElement::FunctionElement (TextT head, LambdaElement * body)
+  LambdaElement(), head(head), body(body)
+{}
+
+// Clone, create a deep copy.
+LambdaElement * FunctionElement::clone ()
+{
+  ! // TODO
+}
+
+// Deconstrutor
+FunctionElement::~FunctionElement ()
+{
+  ! // TODO
+}
+
+// Check to see if the element is closed.
+bool FunctionElement::isClosed () const
+{
+  ! // TODO
+}
+
+// Check to see if the element is closed within a given context.
+bool FunctionElement::isClosedWith
+    (std::vector<VariableElement const *> bounded) const
+{
+  ! // TODO
+}
+
+// Check to see if the element is an expression.
+bool FunctionElement::isExpression () const
+{
+  ! // TODO
+}
+
+// Get the result of an application on a function.
+LambdaElement * FunctionElement::apply (LambdaElement const * arg)
+{
+  ! // TODO
+}
+
+// Get the result of a substution on an element.
+LambdaElement * FunctionElement::substute (SubstutionOp const & subOp)
+{
+  ! // TODO
+}
+
+// Write the element to stream.
+std::ostream & FunctionElement::write (std::ostream & out) const
+{
+  ! // TODO
+}
 
 
 
 // ApplicationElement ========================================================
+// Create a new element from a parse tree.
+ApplicationElement::ApplicationElement (ParseNode const * node)
+  ApplicationElement(), lhs(), rhs()
+{
+  ! // TODO
+}
+
+// Manual constructor, create the element from its parts.
+ApplicationElement::ApplicationElement
+    (LambdaElement * lhs, LambdaElement * rhs)
+  ApplicationElement(), lhs(lhs), rhs(rhs)
+{}
+
+// Clone, create a deep copy.
+LambdaElement * ApplicationElement::clone ()
+{
+  ! // TODO
+}
+
+// Deconstrutor
+ApplicationElement::~ApplicationElement ()
+{
+  ! // TODO
+}
+
+// Check to see if the element is closed.
+bool ApplicationElement::isClosed () const
+{
+  ! // TODO
+}
+
+// Check to see if the element is closed within a given context.
+bool ApplicationElement::isClosedWith
+    (std::vector<VariableElement const *> bounded) const
+{
+  ! // TODO
+}
+
+// Check to see if the element is an expression.
+bool ApplicationElement::isExpression () const
+{
+  ! // TODO
+}
+
+// Get the result of a substution on an element.
+LambdaElement * ApplicationElement::substute (SubstutionOp const & subOp)
+{
+  ! // TODO
+}
+
+// Write the element to stream.
+std::ostream & ApplicationElement::write (std::ostream & out) const
+{
+  ! // TODO
+}
 
 
 

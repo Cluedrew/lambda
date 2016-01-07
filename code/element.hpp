@@ -239,7 +239,7 @@ public:
    * Return: Pointer to new LambdaElement, caller must free.
    */
 
-  virtual ~VariableElement ();
+  virtual ~ApplicationElement ();
 
   bool isClosed () const;
   /* Check to see if the element is closed.
