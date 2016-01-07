@@ -17,73 +17,105 @@ class SubstutionOp;
 
 class LambdaElement
 {
-  LambdaElement (ParseNode const *);
-  /* Create a Element and any sub-Elements from a parse tree.
-   * Params: A pointer to the root node of the parse tree.
+private:
+protected:
+  LambdaElement ();
+  /* Default Constructor
    */
 
-  LambdaElement (LambdaElement const &);
-  /* Create a deep copy of an existing element.
+public:
+  virtual LambdaElement * clone () =0;
+  /* Clone, create a deep copy.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to new LambdaElement, caller must free.
    */
 
-  ~LambdaElement () =0;
+  virtual ~LambdaElement () =0;
 
-  bool isClosed () const;
-  // Check to see if the element is closed.
+  virtual bool isClosed () const =0;
+  /* Check to see if the element is closed.
+   * Return: True if all variables in the element are bound within the
+   *   element.
+   */
 
-  bool isClosedWith (std::vector<Variable const *> bounded) const;
-  // Check to see if the element is closed within a given context.
+  virtual bool isClosedWith (std::vector<Variable const *> bounded) const =0;
+  /* Check to see if the element is closed within a given context.
+   * Params: A vector of pointers to bound variables.
+   * Return: True if all variables are in the element are bound to variables
+   *   in the vector or within the element.
+   */
 
-  bool isExpression () const;
-  // Check to see if the element is an expression.
+  virtual bool isExpression () const =0;
+  /* Check to see if the element is an expression.
+   * Return: True if the element can be evaluated, false otherwise.
+   */
 
-  // Operation Functions
-  virtual LambdaElement * evaluate () const;
+  virtual LambdaElement * evaluate () const =0;
   /* Get the result of an evaluation on the exprestion.
-   * Effect:
-   * Return:
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to the new LambdaElement, caller must frsee.
    * Except:
    */
 
-  virtual LambdaElement * apply (Element const & value) const;
+  virtual LambdaElement * apply (LambdaElement const & value) const =0;
   /* Get the result of an application on a function.
    * Params: A constaint reference to the value taken as the argument.
-   * Effect:
-   * Return:
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to the new LambdaElement, caller must frsee.
    * Except:
    */
 
-  virtual LambdaElement * substute (SubstutionOp const & subOp) const;
+  virtual LambdaElement * substute (SubstutionOp const & subOp) const =0;
   /* Get the result of a substution on an element.
    * Params: A constaint reference to the substution to preform.
-   * Effect:
-   * Return:
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to the new LambdaElement, caller must frsee.
    * Except:
    */
 
-  virtual std::ostream & write (std::ostream &) const;
+  virtual std::ostream & write (std::ostream &) const =0;
   /* Write the element to stream.
    * Params: A reference to an ostream to write to.
    * Effect: Writes to stream.
    * Return: A reference to the provided ostream.
    */
+
+  static LambdaElement * fromParseRoot (ParseNode const *);
+  /* Create a new element from the root of a parse tree.
+   * Params: Pointer to a 'INPUT' ParseNode.
+   */
+
+  static LambdaElement * fromParseTree (ParseNode const *);
+  /* Create a new element from a parse tree.
+   * Params: Pointer to a 'ELEMENT' ParseNode.
+   */
 };
 
-Element * parseNodeToElement (ParseNode const *);
-/* Build an Element from a ParseNode.
- * Params: A pointer to the ParseNode.
- * Effect: Allocates a new Element (and any sub-Elements).
- * Return: A pointer to the new Element, caller must free.
- * Except: Throws std::invalid_argument if the conversion can't be made.
- */
 
-class VariableElement : public Element
+
+class VariableElement : public LambdaElement
 {
 private:
   TextT id;
+
 public:
-  VariableElement (TextT);
   VariableElement (ParseNode const *);
+  /* Create a new element from a parse tree.
+   * Params: Pointer to a 'variable' ParseNode.
+   */
+
+  VariableElement (TextT);
+  /* Manual constructor, create the element from its parts.
+   * Params: The TextT identifier for the variable.
+   */
+
+  LambdaElement * clone ();
+  /* Clone, create a deep copy.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to new LambdaElement, caller must free.
+   */
+
+  virtual ~VariableElement ();
 
   bool isClosed () const;
   /* Check to see if the element is closed.
@@ -96,27 +128,91 @@ public:
    * Return: True if this variable matches one in the bounded vector.
    */
 
+  bool isExpression () const;
+  /* Check to see if the element is an expression.
+   * Return: ??? True if the element can be evaluated, false otherwise.
+   */
+
   LambdaElement * substute (SubstutionOp const & subOp) const;
   /* Get the result of a substution on an element.
    * Params: A constaint reference to the substution to preform.
-   * Effect: Allocates a new Element.
-   * Return: A pointer to the resulting Element, caller must free.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: A pointer to the resulting LambdaElement, caller must free.
+   */
+
+  std::ostream & write (std::ostream &) const;
+  /* Write the element to stream.
+   * Params: A reference to an ostream to write to.
+   * Effect: Writes to stream.
+   * Return: A reference to the provided ostream.
    */
 };
 
 class FunctionElement : public LambdaElement
 {
+private:
   VariableElement head;
   LambdaElement * body;
 
 public:
   FunctionElement (ParseNode const *);
+  /* Create a new element from a parse tree.
+   * Params: Pointer to a 'FUNCTION' ParseNode.
+   * Effect: Allocates sub-elements.
+   */
 
   FunctionElement (TextT, LambdaElement *);
+  /* Manual constructor, create the element from its parts.
+   * Params: The TextT identifier for the parameter and a pointer
+   *   to the body. The element takes ownership of the body.
+   */
+
+  LambdaElement * clone ();
+  /* Clone, create a deep copy.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to new LambdaElement, caller must free.
+   */
+
+  virtual ~FunctionElement ();
+
+  bool isClosed () const;
+  /* Check to see if the element is closed.
+   * Return: True if all variables in the function body are bound.
+   */
+
+  bool isClosedWith (std::vector<VariableElement const *> bounded) const;
+  /* Check to see if the element is closed within a given context.
+   * Params: A vector of pointers to bound variables.
+   * Return: True if all variables in the function body matches one in the
+   *   bounded vector or the function's head.
+   */
+
+  bool isExpression () const;
+  /* Check to see if the element is an expression.
+   * Return: True if function is closed.
+   */
 
   LambdaElement * apply (LambdaElement const *);
+  /* Get the result of an application on a function.
+   * Params: A constaint reference to the value taken as the argument.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to the new LambdaElement, caller must frsee.
+   * Except:
+   */
 
   LambdaElement * substute (SubstutionOp const &);
+  /* Get the result of a substution on an element.
+   * Params: A constaint reference to the substution to preform.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: A pointer to the resulting LambdaElement, caller must free.
+   */
+
+  std::ostream & write (std::ostream &) const;
+  /* Write the element to stream.
+   * Params: A reference to an ostream to write to.
+   * Effect: Writes to stream.
+   * Return: A reference to the provided ostream.
+   */
 };
 
 class ApplicationElement : public LambdaElement
@@ -126,8 +222,54 @@ class ApplicationElement : public LambdaElement
 
 public:
   ApplicationElement (ParseNode const *);
+  /* Create a new element from a parse tree.
+   * Params: Pointer to an 'APPLICATION' ParseNode.
+   * Effect: Allocates sub-elements.
+   */
 
-  // ...
+  ApplicationElement (LambdaElement * lhs, LambdaElement * rhs);
+  /* Manual constructor, create the element from its parts.
+   * Params: Pointers to the left and right hand side of the application.
+   *   The element takes ownership of the pointers.
+   */
+
+  LambdaElement * clone ();
+  /* Clone, create a deep copy.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to new LambdaElement, caller must free.
+   */
+
+  virtual ~VariableElement ();
+
+  bool isClosed () const;
+  /* Check to see if the element is closed.
+   * Return: True if the left and right hand sides are closed.
+   */
+
+  bool isClosedWith (std::vector<VariableElement const *> bounded) const;
+  /* Check to see if the element is closed within a given context.
+   * Params: A vector of pointers to bound variables.
+   * Return: True if this variable matches one in the bounded vector.
+   */
+
+  bool isExpression () const;
+  /* Check to see if the element is an expression.
+   * Return: True if the left and right hand sides are expressions.
+   */
+
+  LambdaElement * substute (SubstutionOp const &);
+  /* Get the result of a substution on an element.
+   * Params: A constaint reference to the substution to preform.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: A pointer to the resulting LambdaElement, caller must free.
+   */
+
+  std::ostream & write (std::ostream &) const;
+  /* Write the element to stream.
+   * Params: A reference to an ostream to write to.
+   * Effect: Writes to stream.
+   * Return: A reference to the provided ostream.
+   */
 };
 
 #endif//ELEMENT_HPP

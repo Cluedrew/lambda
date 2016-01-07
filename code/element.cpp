@@ -1,6 +1,7 @@
 #include "element.hpp"
 
-// Implemention of the Element class.
+// Implemention of the *Element classes; LambdaElement and its subclasses:
+//   VariableElement, FunctionElement & ApplicationElement
 
 #include <ostream>
 #include <stdexcept>
@@ -9,15 +10,42 @@
 #include "token.hpp"
 #include "symbol.hpp"
 
-/*
-  switch (type)
-  {
-  case function:
-  case application:
-  case variable:
-  }
-*/
 
+
+// LambdaElement =============================================================
+// Default Constructor
+LambdaElement::LambdaElement ()
+{}
+
+// Deconstructor
+LambdaElement::~LambdaElement ()
+{}
+
+LambdaElement
+LambdaElement
+LambdaElement
+
+
+
+// VariableElement ===========================================================
+VariableElement::VariableElement () : {}
+VariableElement::VariableElement (TextT id) :
+{}
+
+VariableElement::~VariableElement ()
+
+
+
+// FunctionElement ===========================================================
+
+
+
+// ApplicationElement ========================================================
+
+
+
+// ===========================================================================
+// Old Implementation ========================================================
 // Constructors and Deconstructor ============================================
 // Construct an element from a ParseNode.
 Element::Element (ParseNode const * node)
