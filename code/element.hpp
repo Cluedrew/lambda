@@ -15,6 +15,9 @@
 #include "parse-fwd.hpp"
 class SubstutionOp;
 
+class VariableElement;
+typedef std::vector<VariableElement const *> Context;
+
 class LambdaElement
 {
 private:
@@ -24,7 +27,7 @@ protected:
    */
 
 public:
-  virtual LambdaElement * clone () =0;
+  virtual LambdaElement * clone () const =0;
   /* Clone, create a deep copy.
    * Effect: Allocates a new element and its sub-elements.
    * Return: Pointer to new LambdaElement, caller must free.
@@ -38,9 +41,9 @@ public:
    *   element.
    */
 
-  virtual bool isClosedWith (std::vector<Variable const *> bounded) const =0;
+  virtual bool isClosedWith (Context bounded) const =0;
   /* Check to see if the element is closed within a given context.
-   * Params: A vector of pointers to bound variables.
+   * Params: TODO A vector of pointers to bound variables.
    * Return: True if all variables are in the element are bound to variables
    *   in the vector or within the element.
    */
@@ -51,18 +54,10 @@ public:
    */
 
   virtual LambdaElement * evaluate () const =0;
-  /* Get the result of an evaluation on the exprestion.
+  /* Get the result of an evaluation on the expression.
    * Effect: Allocates a new element and its sub-elements.
-   * Return: Pointer to the new LambdaElement, caller must frsee.
-   * Except:
-   */
-
-  virtual LambdaElement * apply (LambdaElement const & value) const =0;
-  /* Get the result of an application on a function.
-   * Params: A constaint reference to the value taken as the argument.
-   * Effect: Allocates a new element and its sub-elements.
-   * Return: Pointer to the new LambdaElement, caller must frsee.
-   * Except:
+   * Return: Pointer to the new LambdaElement, caller must free.
+   * Except: Throws std::logic_error if not an expression
    */
 
   virtual LambdaElement * substute (SubstutionOp const & subOp) const =0;
@@ -109,7 +104,7 @@ public:
    * Params: The TextT identifier for the variable.
    */
 
-  LambdaElement * clone ();
+  LambdaElement * clone () const;
   /* Clone, create a deep copy.
    * Effect: Allocates a new element and its sub-elements.
    * Return: Pointer to new LambdaElement, caller must free.
@@ -122,7 +117,7 @@ public:
    * Return: False, variables are never closed without context.
    */
 
-  bool isClosedWith (std::vector<VariableElement const *> bounded) const;
+  bool isClosedWith (Context bounded) const;
   /* Check to see if the element is closed within a given context.
    * Params: A vector of pointers to bound variables.
    * Return: True if this variable matches one in the bounded vector.
@@ -130,7 +125,14 @@ public:
 
   bool isExpression () const;
   /* Check to see if the element is an expression.
-   * Return: ??? True if the element can be evaluated, false otherwise.
+   * Return: False
+   */
+
+  LambdaElement * evaluate () const;
+  /* Get the result of an evaluation on the expression.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Never returns
+   * Except: Throws std::logic_error if not an expression
    */
 
   LambdaElement * substute (SubstutionOp const & subOp) const;
@@ -167,7 +169,7 @@ public:
    *   to the body. The element takes ownership of the body.
    */
 
-  LambdaElement * clone ();
+  LambdaElement * clone () const;
   /* Clone, create a deep copy.
    * Effect: Allocates a new element and its sub-elements.
    * Return: Pointer to new LambdaElement, caller must free.
@@ -180,7 +182,7 @@ public:
    * Return: True if all variables in the function body are bound.
    */
 
-  bool isClosedWith (std::vector<VariableElement const *> bounded) const;
+  bool isClosedWith (Context bounded) const;
   /* Check to see if the element is closed within a given context.
    * Params: A vector of pointers to bound variables.
    * Return: True if all variables in the function body matches one in the
@@ -192,7 +194,14 @@ public:
    * Return: True if function is closed.
    */
 
-  LambdaElement * apply (LambdaElement const *);
+  LambdaElement * evaluate () const;
+  /* Get the result of an evaluation on the expression.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to the new LambdaElement, caller must free.
+   * Except: Throws std::logic_error if not an expression
+   */
+
+  LambdaElement * apply (LambdaElement const *) const;
   /* Get the result of an application on a function.
    * Params: A constaint reference to the value taken as the argument.
    * Effect: Allocates a new element and its sub-elements.
@@ -200,7 +209,7 @@ public:
    * Except:
    */
 
-  LambdaElement * substute (SubstutionOp const &);
+  LambdaElement * substute (SubstutionOp const &) const;
   /* Get the result of a substution on an element.
    * Params: A constaint reference to the substution to preform.
    * Effect: Allocates a new element and its sub-elements.
@@ -233,7 +242,7 @@ public:
    *   The element takes ownership of the pointers.
    */
 
-  LambdaElement * clone ();
+  LambdaElement * clone () const;
   /* Clone, create a deep copy.
    * Effect: Allocates a new element and its sub-elements.
    * Return: Pointer to new LambdaElement, caller must free.
@@ -246,7 +255,7 @@ public:
    * Return: True if the left and right hand sides are closed.
    */
 
-  bool isClosedWith (std::vector<VariableElement const *> bounded) const;
+  bool isClosedWith (Context bounded) const;
   /* Check to see if the element is closed within a given context.
    * Params: A vector of pointers to bound variables.
    * Return: True if this variable matches one in the bounded vector.
@@ -257,7 +266,14 @@ public:
    * Return: True if the left and right hand sides are expressions.
    */
 
-  LambdaElement * substute (SubstutionOp const &);
+  LambdaElement * evaluate () const;
+  /* Get the result of an evaluation on the expression.
+   * Effect: Allocates a new element and its sub-elements.
+   * Return: Pointer to the new LambdaElement, caller must free.
+   * Except: Throws std::logic_error if not an expression
+   */
+
+  LambdaElement * substute (SubstutionOp const &) const;
   /* Get the result of a substution on an element.
    * Params: A constaint reference to the substution to preform.
    * Effect: Allocates a new element and its sub-elements.

@@ -12,6 +12,8 @@
 
 
 
+// Thoughts For Upgrades : Implementation Below:
+
 //class Context
 //{
 //private:
@@ -26,10 +28,41 @@
 //  bool isBound (Variable ~) const;
 //  Variable * getBind (Variable ~);
 //}
-class Context
-{
-  std::vector<VariableElement const *> bounded;
-}
+
+/* Might it be worth cashing isClosed and isExpression Booleans?
+ * is%(), is%Flag, is%Dirty, update%(), outofDate%()
+ *
+ * bool is%()
+ * {
+ *   if (is%Dirty)
+ *   {
+ *     is%Flag = update%();
+ *     is%Dirty = false;
+ *   }
+ *   return is%Flag;
+ * }
+ *
+ * // Or declaring the flags as mutable and the above const.
+ * bool is%() const
+ * {
+ *   if (is%Dirty)
+ *     return update%();
+ *   else
+ *     return is%Flag;
+ * }
+ *
+ * void outOfDate%()
+ * {
+ *   is%Dirty = true;
+ * }
+ *
+ * virtual update%() const =0;
+ *
+ * These (and the variables) will be in LambdaElement. Subclasses just have to
+ * implement update%(). clone will have to be updated so this data is copied
+ * over. If the program runs to slowly I'll do it.
+ */
+
 
 
 
@@ -102,7 +135,7 @@ VariableElement::VariableElement (TextT id) :
 {}
 
 // Clone, create a deep copy.
-LambdaElement * clone ()
+LambdaElement * VariableElement::clone () const
 {
   return new VariableElement(id);
 }
@@ -142,14 +175,14 @@ bool VariableElement::isExpression () const
 // Get the result of an evaluation on the exprestion.
 LambdaElement * VariableElement::evaluate () const
 {
-  ! // TODO Error State?
+  throw std::logic_error("evaluate: VariableElement is not an expression.");
 }
 
 // Get the result of a substution on an element.
 LambdaElement * VariableElement::substute (SubstutionOp const & subOp) const
 {
   if (subOp.replaced == id)
-    return subOp.replaces->clone();
+    return subOp.replaces.clone();
   else
     return this->clone();
 }
@@ -164,29 +197,33 @@ std::ostream & VariableElement::write (std::ostream & out) const
 
 // FunctionElement ===========================================================
 // Create a new element from a parse tree.
-FunctionElement::FunctionElement (ParseNode const * node)
-  LambdaElement(), head(), body(nullptr)
+FunctionElement::FunctionElement (ParseNode const * node) :
+  LambdaElement(), head('\0'), body(nullptr)
 {
   if (nullptr == node)
     throw std::invalid_argument("FunctionElement: invalid NULL pointer.");
   if (SymbolT::FUNCTION != node->getHead())
     throw std::invalid_argument("FunctionElement: Not a FUNCTION node.");
 
-  ! // TODO
+  head = node->child(0)->getText();
+  body = LambdaElement::fromParseTree(node->child(2));
 }
 
 // Manual constructor, create the element from its parts.
-FunctionElement::FunctionElement (TextT head, LambdaElement * body)
+FunctionElement::FunctionElement (TextT head, LambdaElement * body) :
   LambdaElement(), head(head), body(body)
-{}
+{
+  if (nullptr == body)
+    throw std::invalid_argument("FunctionElement: invalid NULL pointer.");
+}
 
 // Clone, create a deep copy.
-LambdaElement * FunctionElement::clone ()
+LambdaElement * FunctionElement::clone () const
 {
   LambdaElement * tmpBody = body->clone();
 
   try
-    return new FunctionElement(head, tmpBody);
+    return new FunctionElement(head.id, tmpBody);
   catch (...)
   {
     delete tmpBody;
@@ -200,11 +237,12 @@ FunctionElement::~FunctionElement ()
   delete body;
 }
 
+
+
 // Check to see if the element is closed.
 bool FunctionElement::isClosed () const
 {
-  return fun.body->isClosedWith(
-      std::vector<Variable const *>(1, &fun.head));
+  return body->isClosedWith(Context(1, &head));
 }
 
 // Check to see if the element is closed within a given context.
@@ -213,14 +251,14 @@ bool FunctionElement::isClosedWith
 {
   for (unsigned int i = 0 ; i < bounded.size() ; ++i)
   {
-    if (bounded[i]->id == fun.head.id)
+    if (bounded[i]->id == head.id)
     {
-      bounded[i] = &fun.head;
-      return fun.body->isClosedWith(bounded);
+      bounded[i] = &head;
+      return body->isClosedWith(bounded);
     }
   }
-  bounded.push_back(&fun.head);
-  return fun.body->isClosedWith(bounded);
+  bounded.push_back(&head);
+  return body->isClosedWith(bounded);
 }
 
 // Check to see if the element is an expression.
@@ -237,17 +275,18 @@ LambdaElement * FunctionElement::evaluate () const
   if (isExpression())
     return clone();
   else
-    ! // TODO
+    throw std::logic_error("evaluate: FunctionElement is not an expression.");
+
 }
 
 // Get the result of an application on a function.
-LambdaElement * FunctionElement::apply (LambdaElement const * arg)
+LambdaElement * FunctionElement::apply (LambdaElement const * arg) const
 {
   return body->substute(SubstutionOp(head.id, arg));
 }
 
 // Get the result of a substution on an element.
-LambdaElement * FunctionElement::substute (SubstutionOp const & subOp)
+LambdaElement * FunctionElement::substute (SubstutionOp const & subOp) const
 {
   if (head.id == subOp.replaced)
     return clone();
@@ -277,25 +316,36 @@ std::ostream & FunctionElement::write (std::ostream & out) const
 
 // ApplicationElement ========================================================
 // Create a new element from a parse tree.
-ApplicationElement::ApplicationElement (ParseNode const * node)
-  ApplicationElement(), lhs(), rhs()
+ApplicationElement::ApplicationElement (ParseNode const * node) :
+  LambdaElement(), lhs(nullptr), rhs(nullptr)
 {
   if (nullptr == node)
     throw std::invalid_argument("ApplicationElement: invalid NULL pointer.");
   if (SymbolT::APPLICATION != node->getHead())
     throw std::invalid_argument("ApplicationElement: Not an APPLICATION node.");
 
-  ! // TODO
+  LambdaElement * tmpLhs = LambdaElement::fromParseTree(node->child(1));
+  try
+    rhs = LambdaElement::fromParseTree(node->child(2));
+  catch (...)
+  {
+    delete tmpLhs;
+    throw;
+  }
+  lhs = tmpLhs;
 }
 
 // Manual constructor, create the element from its parts.
 ApplicationElement::ApplicationElement
-    (LambdaElement * lhs, LambdaElement * rhs)
+    (LambdaElement * lhs, LambdaElement * rhs) :
   ApplicationElement(), lhs(lhs), rhs(rhs)
-{}
+{
+  if (nullptr == lhs || nullptr == rhs)
+    throw std::invalid_argument("ApplicationElement: invalid NULL pointer.");
+}
 
 // Clone, create a deep copy.
-LambdaElement * ApplicationElement::clone ()
+LambdaElement * ApplicationElement::clone () const
 {
   LambdaElement * tmpLhs = lhs->clone();
   try
@@ -323,6 +373,8 @@ ApplicationElement::~ApplicationElement ()
   delete rhs;
 }
 
+
+
 // Check to see if the element is closed.
 bool ApplicationElement::isClosed () const
 {
@@ -347,6 +399,10 @@ bool ApplicationElement::isExpression () const
 // Get the result of an evaluation on the exprestion.
 LambdaElement * ApplicationElement::evaluate () const
 {
+  if (!isExpression())
+    throw std::logic_error(
+        "evaluate: ApplicationElement is not an expression.");
+
   LambdaElement * tmpLhs = lhs->evaluate();
   try
   {
@@ -378,7 +434,7 @@ LambdaElement * ApplicationElement::evaluate () const
 }
 
 // Get the result of a substution on an element.
-LambdaElement * ApplicationElement::substute (SubstutionOp const & subOp)
+LambdaElement * ApplicationElement::substute (SubstutionOp const & subOp)const
 {
   LambdaElement * tmpLhs = lhs->substute(subOp);
   try

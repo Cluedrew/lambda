@@ -5,14 +5,14 @@
 // [ replaces / replaced ]
 
 #include "parse-fwd.hpp"
-class Element;
+class LambdaElement;
 
 struct SubstutionOp
 {
   TextT replaced;
-  Element const & replaces;
+  LambdaElement const & replaces;
 
-  SubstutionOp (TextT var, Element const & val) :
+  SubstutionOp (TextT var, LambdaElement const & val) :
     replaced(var), replaces(val)
   {}
 };
