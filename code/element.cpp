@@ -195,6 +195,20 @@ std::ostream & VariableElement::write (std::ostream & out) const
 
 
 
+// Convert the element to text.
+VariableElement::operator TextT () const
+{
+  return id;
+}
+
+// Check for equality between two VariableElements.
+bool VariableElement::operator== (VariableElement const & other) const
+{
+  return id == other.id;
+}
+
+
+
 // FunctionElement ===========================================================
 // Create a new element from a parse tree.
 FunctionElement::FunctionElement (ParseNode const * node) :
@@ -223,7 +237,9 @@ LambdaElement * FunctionElement::clone () const
   LambdaElement * tmpBody = body->clone();
 
   try
-    return new FunctionElement(head.id, tmpBody);
+  {
+    return new FunctionElement(TextT(head), tmpBody);
+  }
   catch (...)
   {
     delete tmpBody;
@@ -251,7 +267,7 @@ bool FunctionElement::isClosedWith
 {
   for (unsigned int i = 0 ; i < bounded.size() ; ++i)
   {
-    if (bounded[i]->id == head.id)
+    if (*bounded[i] == head)
     {
       bounded[i] = &head;
       return body->isClosedWith(bounded);
@@ -282,19 +298,21 @@ LambdaElement * FunctionElement::evaluate () const
 // Get the result of an application on a function.
 LambdaElement * FunctionElement::apply (LambdaElement const * arg) const
 {
-  return body->substute(SubstutionOp(head.id, arg));
+  return body->substute(SubstutionOp(TextT(head), *arg));
 }
 
 // Get the result of a substution on an element.
 LambdaElement * FunctionElement::substute (SubstutionOp const & subOp) const
 {
-  if (head.id == subOp.replaced)
+  if (TextT(head) == subOp.replaced)
     return clone();
   else
   {
     LambdaElement * tmpBody = body->substute(subOp);
     try
-      return new FunctionElement(head.id, tmpBody);
+    {
+      return new FunctionElement(TextT(head), tmpBody);
+    }
     catch (...)
     {
       delete tmpBody;
@@ -326,7 +344,9 @@ ApplicationElement::ApplicationElement (ParseNode const * node) :
 
   LambdaElement * tmpLhs = LambdaElement::fromParseTree(node->child(1));
   try
+  {
     rhs = LambdaElement::fromParseTree(node->child(2));
+  }
   catch (...)
   {
     delete tmpLhs;
@@ -338,7 +358,7 @@ ApplicationElement::ApplicationElement (ParseNode const * node) :
 // Manual constructor, create the element from its parts.
 ApplicationElement::ApplicationElement
     (LambdaElement * lhs, LambdaElement * rhs) :
-  ApplicationElement(), lhs(lhs), rhs(rhs)
+  LambdaElement(), lhs(lhs), rhs(rhs)
 {
   if (nullptr == lhs || nullptr == rhs)
     throw std::invalid_argument("ApplicationElement: invalid NULL pointer.");
@@ -352,7 +372,9 @@ LambdaElement * ApplicationElement::clone () const
   {
     LambdaElement * tmpRhs = rhs->clone();
     try
+    {
       return new ApplicationElement(tmpLhs, tmpRhs);
+    }
     catch (...)
     {
       delete tmpRhs;
@@ -441,7 +463,9 @@ LambdaElement * ApplicationElement::substute (SubstutionOp const & subOp)const
   {
     LambdaElement * tmpRhs = rhs->substute(subOp);
     try
+    {
       return new ApplicationElement(tmpLhs, tmpRhs);
+    }
     catch (...)
     {
       delete tmpRhs;

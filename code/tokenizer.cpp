@@ -3,6 +3,7 @@
 // Implementation of the Tokenizer and the TokenStream
 
 #include <cstdlib>
+#include <iostream>
 #include "token.hpp"
 #include "symbol.hpp"
 

@@ -148,6 +148,17 @@ public:
    * Effect: Writes to stream.
    * Return: A reference to the provided ostream.
    */
+
+  operator TextT () const;
+  /* Convert the element to text.
+   * Return: The variable id.
+   */
+
+  bool operator== (VariableElement const &) const;
+  /* Check for equality between two VariableElements.
+   * Params: A constant reference to another VariableElement.
+   * Return: True if the two objects have the same id.
+   */
 };
 
 class FunctionElement : public LambdaElement

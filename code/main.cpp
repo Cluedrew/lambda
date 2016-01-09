@@ -66,17 +66,24 @@ int main (int argc, char * argv[])
   CFGParser parser(readCFGFromFile("lang.cfg"),
                    readActionTableFromFile("lang.sr"));
 
-  parser.printInternal(std::cout);
-
   // Prepare a Tokenizer
-  std::ifstream inputFile("test.l");
-  Tokenizer tokenStream(inputFile);
+  Tokenizer tokenStream(std::cin);
 
   // Parse the file.
   ParseNode * parseRootNode = parser.parse(tokenStream);
 
+  // ParseTree->CodeTree
+  LambdaElement * codeRoot = LambdaElement::fromParseRoot(parseRootNode);
+
   // Free the parse tree.
   delete parseRootNode;
+  parseRootNode = NULL;
+
+  // ...
+
+  // Free the code tree.
+  delete codeRoot;
+  codeRoot = NULL;
 
   return 0;
 }
