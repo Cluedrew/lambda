@@ -7,7 +7,6 @@
 #include "token.hpp"
 #include "symbol.hpp"
 
-Token const eofToken = Token{getEofSymbol(), '\0'};
 
 
 // ===========================================================================
@@ -28,13 +27,14 @@ Tokenizer::~Tokenizer ()
 Token Tokenizer::next()
 {
   // If we are already reached the end of output return the eof.
-  if (input.eof())
+  if (!input.eof())
   {
     // Search forward for the next token.
     do {
       // Get the next character.
-      char ch;
-      input.get(ch);
+      int ch = input.get();
+
+      std::cerr << ch << std::endl;
 
       // Check to see if it forms a token.
       if (ch == '.')
@@ -44,7 +44,7 @@ Token Tokenizer::next()
       else if (ch == ')')
         return Token{SymbolT::closeApp, ')'};
       else if ('a' <= ch && ch <= 'z')
-        return Token{SymbolT::variable, ch};
+        return Token{SymbolT::variable, char(ch)};
 
     } while (!input.eof());
   }

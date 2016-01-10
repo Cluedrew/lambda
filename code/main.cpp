@@ -69,6 +69,18 @@ int main (int argc, char * argv[])
   // Prepare a Tokenizer
   Tokenizer tokenStream(std::cin);
 
+  Token tok;
+//  for (int i = 0 ; i < 5 ; ++i)
+  {
+    tok = tokenStream.next();
+    std::cout << "next token: ";
+    std::cout << tok << std::endl;
+  }
+  while (eofToken != tok);
+
+  return 0;
+
+#if 0
   // Parse the file.
   ParseNode * parseRootNode = parser.parse(tokenStream);
 
@@ -86,4 +98,5 @@ int main (int argc, char * argv[])
   codeRoot = NULL;
 
   return 0;
+#endif
 }

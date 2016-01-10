@@ -8,6 +8,7 @@
  * I decide enforcing it was not worth the trouble so... houner system.
  */
 
+#include <iosfwd>
 #include "parse-fwd.hpp"
 
 struct Token
@@ -21,15 +22,16 @@ struct Token
 
 
 
-// Operator definitions.
-inline bool operator== (Token t1, Token t2)
-{
-  return (t1.kind == t2.kind) && (t1.text == t2.text);
-}
+// Definition of the end of stream marker.
+extern Token const eofToken;
 
-inline bool operator!= (Token t1, Token t2)
-{
-  return (t1.kind != t2.kind) || (t1.text != t2.text);
-}
+
+
+// Operator definitions.
+bool operator== (Token t1, Token t2);
+
+bool operator!= (Token t1, Token t2);
+
+std::ostream & operator<< (std::ostream & out, Token const & token);
 
 #endif//TOKEN_HPP
