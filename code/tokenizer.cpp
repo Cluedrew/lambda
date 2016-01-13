@@ -27,14 +27,12 @@ Tokenizer::~Tokenizer ()
 Token Tokenizer::next()
 {
   // If we are already reached the end of output return the eof.
-  if (!input.eof())
+  if (input.good())
   {
     // Search forward for the next token.
     do {
       // Get the next character.
       int ch = input.get();
-
-      std::cerr << ch << std::endl;
 
       // Check to see if it forms a token.
       if (ch == '.')
@@ -46,7 +44,7 @@ Token Tokenizer::next()
       else if ('a' <= ch && ch <= 'z')
         return Token{SymbolT::variable, char(ch)};
 
-    } while (!input.eof());
+    } while (input.good());
   }
 
   // If we reached the end of input produce the eofToken.

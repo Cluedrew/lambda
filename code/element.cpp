@@ -85,7 +85,7 @@ LambdaElement * LambdaElement::fromParseRoot (ParseNode const * node)
   if (SymbolT::INPUT != node->getHead())
     throw std::invalid_argument("fromParseRoot: Not an INPUT node.");
 
-  return fromParseRoot(node->child(0));
+  return fromParseTree(node->child(0));
 }
 
 // Create a new element from a parse tree.

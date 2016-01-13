@@ -25,7 +25,7 @@ class Token;
 class Tokenizer
 {
 public:
-  // static function preform 'instant' tokenization.
+  // static functions preform 'instant' tokenization.
 
   static std::vector<Token> mass (std::istream &);
   /* Mass tokenization, transform the entire stream into tokens.
