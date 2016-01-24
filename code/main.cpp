@@ -66,6 +66,10 @@ int main (int argc, char * argv[])
   CFGParser parser(readCFGFromFile("lang.cfg"),
                    readActionTableFromFile("lang.sr"));
 
+  // Prompt the user for input.
+  std::cout << "\nEnter a lambda element (Enter Ctrl-D to finish):"
+            << std::endl;
+
   // Prepare a Tokenizer
   Tokenizer tokenStream(std::cin);
 
@@ -80,8 +84,19 @@ int main (int argc, char * argv[])
   parseRootNode = NULL;
 
   // Print the code tree.
+  std::cout << "Input Element:" << std::endl;
   codeRoot->write(std::cout);
   std::cout << std::endl;
+
+  // If it is an expression, evaluate and print.
+  if (codeRoot->isExpression())
+  {
+    std::cout << "Evaluates to:" << std::endl;
+    LambdaElement * codeResult = codeRoot->evaluate();
+    codeResult->write(std::cout);
+    std::cout << std::endl;
+    delete codeResult;
+  }
 
   // Free the code tree.
   delete codeRoot;

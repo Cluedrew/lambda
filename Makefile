@@ -61,7 +61,7 @@ clean :
 
 # Phony rule for cleaning generated files
 deepclean : clean
-	-rm inkv7
+	-rm ${EXE}
 
 # Phony rule for running the test wrapper
 test : ${EXE}
